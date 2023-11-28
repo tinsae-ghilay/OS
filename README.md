@@ -22,7 +22,7 @@ Check if gcc, g++, and gdb are installed.
 ```shell
 # check versions
 
-usr@PC:~$ gcc -v
+$ gcc -v
 $ g++ -v
 $ gdb -v
 ```
