@@ -1,6 +1,10 @@
 # OS
 
-## Stay on VS code and Arch
+## Arch
+
+### Programming
+
+<em> Stay on VS Code</em>
 
 The Aur version of VS-Code, can be cloned or 
 
