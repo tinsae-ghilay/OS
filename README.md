@@ -8,7 +8,7 @@
 
 The Aur version of VS-Code, can be cloned or 
 
-```console
+```shell
 $ yay -S visual-studio-code-bin
 ```
 #### Python
@@ -19,7 +19,7 @@ Installing extensions for python is enough without further hussle
 
 Check if gcc, g++, and gdb are installed.
 
-```console
+```shell
 # check versions
 
 usr@PC:~$ gcc -v
@@ -28,7 +28,7 @@ $ gdb -v
 ```
 gdb won't probably be installed, so install it with
 
-```console
+```shell
 # dont know if gdb-common is needed. try without it next time
 $ sudo pacman -S gdb gdb-common
 ```
