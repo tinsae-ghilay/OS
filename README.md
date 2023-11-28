@@ -2,9 +2,14 @@
 
 ## Stay on VS code and Arch
 
+The Aur version of VS-Code, can be cloned or 
+
+```bash
+$ yay -S visual-studio-code-bin
+```
 #### Python
 
-Installing Python extensions from windows is enough without further hussle
+Installing extensions for python is enough without further hussle
 
 #### C / C++
 
