@@ -42,8 +42,7 @@ Some libraries that are in code may be compiled because they are included (impor
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
-													" -lm "
+                "${fileDirname}/${fileBasenameNoExtension}","-lm"
             ],
 ```
 
