@@ -33,8 +33,18 @@ gdb won't probably be installed, so install it with
 $ sudo pacman -S gdb gdb-common
 ```
 and then in VS-Code install the extension for C/C++ and done! well, not quite.<br>
-Some libraries that are in code may be compiled because they are included (imported) but linker just doesn't know they are required. hence, we must tell linker to link them. and we do this by adding 
+Some libraries that are in code may be compiled because they are included (imported) but linker just doesn't know they are required. hence, we must tell linker to link them. and we do this by adding `"-lm"` to Argos[] in task.json like the following.
 ```xml 
-		"libm"
+		
+"args": [
+                "-fdiagnostics-color=always",
+                "-fopenmp",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}",
+													"-lm"
+            ],
 ```
+
 to tasks.json file
