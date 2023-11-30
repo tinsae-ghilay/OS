@@ -43,7 +43,7 @@ Some libraries that are in code may be compiled because they are included (impor
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-													"-lm"
+													" -lm "
             ],
 ```
 
