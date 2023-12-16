@@ -2,7 +2,7 @@
 
 ## Arch
 
-## screen recording
+### screen recording
 install recordmydesktop using
 ```bash
 sudo pacman -S recordmydesktop
