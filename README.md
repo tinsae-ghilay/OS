@@ -12,8 +12,8 @@ recordmydesktop
 
 # this will record screen in .ogv format.
 # it can be converted to any other format using ffmpeg
-# the output will probably be called out.ogv, output
-# (here - recording.mp4) video can be any name
+# the output will probably be called out.ogv,and
+# output (here - recording.mp4) video can be any name
 ffmpeg -i out.ogv recording.mp4
 
 ```
