@@ -2,6 +2,21 @@
 
 ## Arch
 
+## screen recording
+install recordmydesktop using
+```bash
+sudo pacman -S recordmydesktop
+// and to record screen start the program with
+
+recordmydesktop
+
+// this will record screen in .ogv format.
+// it can be converted to any other format using ffmpeg
+// the output will probably be called out.ogv, output(here - recording.mp4) video can be any name
+ffmpeg -i out.ogv recording.mp4
+
+```
+
 ### Programming
 
 <em> Stay on VS Code</em>
