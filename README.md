@@ -99,4 +99,4 @@ and not to forget, since most of the time there will be multiple files to compil
 
 # Bios
 
-u might forget bios password. if this happens, refer to [this](https://bios-pw.org/) to get password. it helped me.
+you may forget bios password. if this happens, refer to [this](https://bios-pw.org/) page to get password. it helped me reset mine.
