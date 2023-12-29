@@ -95,3 +95,8 @@ and not to forget, since most of the time there will be multiple files to compil
 	"version": "2.0.0"
 }
 ```
+
+
+# Bios
+
+u might forget bios password. if this happens, refer to [this](https://bios-pw.org/) to get password. it helped me.
