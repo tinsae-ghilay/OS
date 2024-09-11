@@ -12,7 +12,7 @@ else
     count=$(grep -ic $1  songs.txt)
 
     if [[ $count -gt 0 ]] ; then 
-        echo "$count hits found for $1"
+        echo "$count hits found for '$1'"
     else
         echo "Error: No hits found. Check error log for details."
         echo "$(date) :: No entries for '$1' found. Update the database and try again." >> errorLog.txt
