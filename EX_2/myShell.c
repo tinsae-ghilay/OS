@@ -18,8 +18,8 @@ int main()
         printf("> ");
 
         // start reading user input
-        char cmd[1024];
-        if(fgets(cmd,1024, stdin) == NULL) {
+        char cmd[128];
+        if(fgets(cmd,128, stdin) == NULL) {
             continue;
         }
 
@@ -29,11 +29,9 @@ int main()
         // see if user wants to exit
         if(strcmp(cmd, "exit") == 0 ||  strcmp(cmd, "EXIT") == 0 ) {
             // user wants to exit
-            printf("myShell has been closed, Good bye!");
+            printf("myShell has been closed, Good bye!\n");
             break;
         }
-
-        // lets try to execute the command
 
         // first lets fork to start a new proccess
         pid_t pid = fork();
@@ -50,19 +48,50 @@ int main()
         }else if(pid == 0) { // child proccess succesfuly started
 
             // lets parse cmd in to an array of command arguments
+            char* commands[8];
 
-            int i = 0;
-            char* commands[512];
+            // first part of command before space
             char* token = strtok(cmd, " ");
-            while(token != NULL && i < 511) {
+
+            // if we must have a script file identification, then
+            // lets check if its a file first by trying to open it using the first word as a path
+            FILE* f = fopen(token,"r");
+
+            // index of commands
+            int i = 0;
+
+            // if this is a file
+            if(f != NULL) {
+                // is it a script file?
+                char line[128];
+                fgets(line,128,f); // getting the first line
+                // if it has SheBang the it is a script file
+                // we could also just check if file extension is .sh with strstr(stack, needle) and I tried it, it works. but what if it doesnt have a file extension?
+                if(line[0] == '#' && line[1] == '!') {
+                    // we have a script file.
+                    printf("SheBang! this is a script file and executing it results in the following\n");
+
+                    // adding bash to system call.
+                    commands[0] = "/bin/bash";
+                    // since we set first item of commands, we increment index
+                    i++;
+                }else { // its not a script file
+                    printf("SheDang! this is not a script file and executing it results in the following\n");
+                }
+            }
+            // closing the file as we have no need for it.
+            fclose(f);
+
+            // adding the rest of the commands to the array of commands
+            // remember, if it is a script, commands[0] is already set and i = 1 here, if not i = 0, and items will be set accordingly
+            while(token != NULL && i < 8) {
                 commands[i] = token;
                 token = strtok(NULL," ");
                 i++;
             }
             // terminate commands
             commands[i] = NULL;
-
-            // so we execute command
+            // and we execute
             execv(commands[0],commands);
             // here program should have executed command and start over. as in continue
             // if not, it means we have error
