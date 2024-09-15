@@ -5,13 +5,12 @@
 # include <signal.h>
 # include <stdio.h>
 # include <string.h>
-//# include <sys/types.h>
 # include <unistd.h>
 # include <stdlib.h>
 # include <sys/wait.h>
 
 
-int main(int argc, char* argv[])
+int main()
 {
     // endless loop because we will keep our program open untill user enters 'exit'
     while(1){
@@ -50,7 +49,7 @@ int main(int argc, char* argv[])
 
         }else if(pid == 0) { // child proccess succesfuly started
 
-            // lets parse cmd int to an array of command arguments
+            // lets parse cmd in to an array of command arguments
 
             int i = 0;
             char* commands[512];
