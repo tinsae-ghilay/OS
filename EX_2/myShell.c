@@ -64,7 +64,11 @@ int main()
             if(f != NULL) {
                 // is it a script file?
                 char line[128];
-                fgets(line,128,f); // getting the first line
+                if(fgets(line,128,f)==NULL) {// getting the first line
+
+                    printf("Sorry, first line turned out to be empty: bad syntax cannot run this file");
+                    exit(1);
+                }
                 // if it has SheBang the it is a script file
                 // we could also just check if file extension is .sh with strstr(stack, needle) and I tried it, it works. but what if it doesnt have a file extension?
                 if(line[0] == '#' && line[1] == '!') {
