@@ -206,8 +206,8 @@ int main()
 
     // and we print values
     printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n",find(res,1),find(res,0),add(res));
-// finally we free resulting matrix
-free(res);
+    // finally we free resulting matrix
+    free(res);
 
 return NULL;
 
