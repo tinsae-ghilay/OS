@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-# define W_1 20 // width of matrix 1 and height of matrix 2
+# define W_1 20// width of matrix 1 and height of matrix 2
 # define W_2 12 // width of matrix 2 and resulting matrix
 # define HEIGHT 10 // Height of matrix 1 and resulting matrix
 
@@ -45,6 +45,7 @@ void* calculateCell(void *args)
     // row and column of result matrix
     int col = COLUMN(index,W_2);
     int row = ROW(index, W_2);
+    //printf("index is %d\n",row);
 
     // starting index on column 0 of first matrix, we get the row from row of resulting matrix
     int i_1 = INDEX(row,0, W_1);
@@ -60,12 +61,15 @@ void* calculateCell(void *args)
         // add cell of m1 * m2 and add it to cell value
         cell+= (m1[i_1] * m2[i_2]);
         // slide one column in matrix 1;
+        //printf("indexes are %d and %d\n", i_1,i_2);
         i_1++;
         // and we slide down the column by one row
         i_2+= W_2;
     }
     // and we set value
     res[index] = cell;
+    // struct is created using malloc, so we free it.
+    free(p);
     return (NULL);
 }
 
@@ -96,7 +100,7 @@ int main()
 
     // setting random values for matrix 1
     for(int i = 0; i < size_1; i++){
-        m_1[i] = random()%100;
+        m_1[i] = random()%20;
     }
 
     // print first matrix
@@ -111,7 +115,7 @@ int main()
 
     // filling second matrix with random values
     for(int i = 0; i < size_2; i++){
-        m_2[i] = random()%100;
+        m_2[i] = random()%20;
     }
 
     // print second matrix
@@ -121,6 +125,7 @@ int main()
     // resulting matrix size and innitialisation
     int res_size = HEIGHT * W_2;
     int res[res_size] = {};
+    //int *res = malloc(res_size * sizeof(int));
 
     // since every cell in the resulting matrix has to run in a separate thread,
     // we need to start as much threads as size of resulting matrix. we can do it in a loop may be
@@ -134,28 +139,30 @@ int main()
     for(int i = 0; i < res_size; i++){
 
         // struct to hold our parameters - @ see struct above
-        struct params pr;
-        pr.index = i;
-        pr.m1 = m_1;
-        pr.m2 = m_2;
-        pr.res = res;
-        // we need to make sure a thread is created. try again and again if it was not created
-        int tr = pthread_create(&threads[i], NULL, calculateCell,&pr);
-        if(!tr){ // if creating a thread failed, try again and again
-            tr = pthread_create(&threads[i], NULL, calculateCell,&pr);
+        struct params *pr = malloc(sizeof(struct params));
+        pr->index = i;
+        pr->m1 = m_1;
+        pr->m2 = m_2;
+        pr->res = res;
+        // we need to make sure a thread is created.
+        if(!pthread_create(&threads[i], NULL, calculateCell,pr)){
+
             threadCount++;
+        }else{
+            printf("Thread %d creating failed\n",i);
         }
     }
 
     // lets join threads if the finished their task
     for(int i = 0; i < threadCount; i++){
-        // my idea of making sure that threads are joined
-        //int success =
-        pthread_join(threads[i], NULL);// == 0;
+        if(pthread_join(threads[i], NULL)){
+            printf("Thread did not join");
+        }
     }
 
     printf("\n%d threads done\n", threadCount);
     printf("\nResulting matrix\n-----------------------\n");
+
 
     printMatrix(res,res_size , W_2);
     // and here we print our resulting matrix data
