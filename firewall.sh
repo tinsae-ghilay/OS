@@ -29,7 +29,7 @@ echo acceping output : :: :: :: :: :: :: :: :: :: :: :: :: :: :: :: :: :: ::
 iptables -P OUTPUT ACCEPT
 
 # the input chain
-# drop outgoing
+# drop incoming
 echo droping input chain :: :: :: :: :: :: :: :: :: :: :: :: :: :: :: :: :: 
 iptables -P INPUT DROP
 
