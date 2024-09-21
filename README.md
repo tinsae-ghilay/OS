@@ -96,6 +96,18 @@ and not to forget, since most of the time there will be multiple files to compil
 	"version": "2.0.0"
 }
 ```
+# Valgrind
+
+The Valgrind tool suite provides a number of debugging and profiling tools that help you make your programs faster and more correct. The most popular of these tools is called Memcheck. 
+It can detect many memory-related errors that are common in C and C++ programs and that can lead to crashes and unpredictable behaviour. [source](https://valgrind.org/docs/manual/quick-start.html)
+
+Valgrind can be installed from arch official repos and to use valgrind
+we use the valgrind command like the following
+
+```shell
+# Assuming the executable is called program and we are in the directory
+valgrind --leak-check=yes ./program
+```
 
 
 # Bios
