@@ -5,14 +5,14 @@ files = matrix.c
 # this way we have our make file always working,
 # so long as files are in the same folder
 # then substitute the .cpp part of $(files) with .o
-objects = matrix.o
+objects = atomic.o
 # executable file
 BIN = atomic
 #g++ commands
 # g++
 CFLAG = gcc
 # C++ version to compile to
-VFLAG = -std=c++2a
+# VFLAG = -std=c++11
 # error handling flags
 WFLAG = -Wall -Werror
 
@@ -21,10 +21,10 @@ all: $(BIN)
 
 # create executable from object files
 $(BIN): $(objects)
-	$(CFLAG) $(VFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lpthread
+	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lpthread
 
 # create object files from source files
-%.o: %.cpp
+%.o: %.c
 	$(CFLAG) $(VFLAG) $(WFLAG) -g -c $< -o $@
 
 # run the program
@@ -33,4 +33,4 @@ run: $(BIN)
 # clean
 .PHONY:clean
 clean:
-	rm -f $(BIN) matrix.o
+	rm -f $(BIN) atomic.o

@@ -12,7 +12,7 @@ BIN = matrix
 # g++
 CFLAG = gcc
 # C++ version to compile to
-VFLAG = -std=c++2a
+# VFLAG = -std=c++11
 # error handling flags
 WFLAG = -Wall -Werror
 
@@ -21,10 +21,10 @@ all: $(BIN)
 
 # create executable from object files
 $(BIN): $(objects)
-	$(CFLAG) $(VFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lpthread
+	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lpthread
 
 # create object files from source files
-%.o: %.cpp
+%.o: %.c
 	$(CFLAG) $(VFLAG) $(WFLAG) -g -c $< -o $@
 
 # run the program

@@ -3,7 +3,6 @@
 //
 
 #include <pthread.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -36,14 +35,14 @@ void* calculateCell(void *args)
     // struct that holds our arguments
     // @see above
     struct params *p  = args;
-    int index = p->index;
-    int* m1 = p->m1;
-    int* m2 = p->m2;
+    const int index = p->index;
+    const int* m1 = p->m1;
+    const int* m2 = p->m2;
     int *res = p->res;
 
     // row and column of result matrix
-    int col = COLUMN(index,W_2);
-    int row = ROW(index, W_2);
+    const int col = COLUMN(index,W_2);
+    const int row = ROW(index, W_2);
     //printf("index is %d\n",row);
 
     // starting index on column 0 of first matrix, we get the row from row of resulting matrix
@@ -71,10 +70,10 @@ void* calculateCell(void *args)
     return (NULL);
 }
 // finds a minumum or maximum value in a matrix
-int find(int* matrix, int flag){
+int find(const int* matrix, const int flag){
 
     // size of matrix;
-    int size = W_2 * HEIGHT;
+    const int size = W_2 * HEIGHT;
     // min or max is assumed as the first element of array.
     int value = matrix[0];
     for(int i = 0; i < size; i++){
@@ -92,7 +91,7 @@ int find(int* matrix, int flag){
 }
 
 // adds all items of matrix
-int add(int* matrix){
+int add(const int* matrix){
     int sum = 0;
     for(int i = 0; i < W_2 * HEIGHT; i++){
 
@@ -128,10 +127,10 @@ struct matrix {
 int main()
 {
     // size of first array
-    int size_1 = SIZE(W_1,HEIGHT);
+    const int size_1 = SIZE(W_1,HEIGHT);
 
     // first matrix
-    int *m_1 = malloc(size_1 * sizeof(int);
+    int *m_1 = malloc(size_1 * sizeof(int));
 
     // setting random values for matrix 1
     for(int i = 0; i < size_1; i++){
@@ -143,10 +142,10 @@ int main()
     printMatrix(m_1,size_1, W_1);
 
     // size of second matrix
-    int size_2 = SIZE(W_1,W_2);
+    const int size_2 = SIZE(W_1,W_2);
 
     // second matrix
-    int *m_2 = malloc(size_2 * sizeof(int);
+    int *m_2 = malloc(size_2 * sizeof(int));
 
     // filling second matrix with random values
     for(int i = 0; i < size_2; i++){
@@ -158,8 +157,8 @@ int main()
     printMatrix(m_2,size_2 , W_2);
 
     // resulting matrix size and innitialisation
-    int res_size = HEIGHT * W_2;
-    int *res = malloc(res_size * sizeof(int);
+    const int res_size = HEIGHT * W_2;
+    int *res = malloc(res_size * sizeof(int));
     //int *res = malloc(res_size * sizeof(int));
 
     // since every cell in the resulting matrix has to run in a separate thread,
@@ -205,11 +204,11 @@ int main()
     printMatrix(res,res_size , W_2);
 
     // and we print values
-    printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n",find(res,1),find(res,0),add(res));
+    printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n\n",find(res,1),find(res,0),add(res));
     // finally we free resulting matrix
     free(res);
 
-return NULL;
+return 0;
 
 
 
