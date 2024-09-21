@@ -131,7 +131,7 @@ int main()
     int size_1 = SIZE(W_1,HEIGHT);
 
     // first matrix
-    int m_1[size_1] = {};
+    int *m_1 = malloc(size_1 * sizeof(int);
 
     // setting random values for matrix 1
     for(int i = 0; i < size_1; i++){
@@ -146,7 +146,7 @@ int main()
     int size_2 = SIZE(W_1,W_2);
 
     // second matrix
-    int m_2[size_2] = {};
+    int *m_2 = malloc(size_2 * sizeof(int);
 
     // filling second matrix with random values
     for(int i = 0; i < size_2; i++){
@@ -159,7 +159,7 @@ int main()
 
     // resulting matrix size and innitialisation
     int res_size = HEIGHT * W_2;
-    int res[res_size] = {};
+    int *res = malloc(res_size * sizeof(int);
     //int *res = malloc(res_size * sizeof(int));
 
     // since every cell in the resulting matrix has to run in a separate thread,
@@ -194,6 +194,9 @@ int main()
             printf("Thread did not join");
         }
     }
+     // we free first and second matrices as we are done with them
+     free(m_1);
+     free(m_2);
 
     printf("\n%d threads done\n", threadCount);
     printf("\nResulting matrix\n-----------------------\n");
@@ -203,7 +206,10 @@ int main()
 
     // and we print values
     printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n",find(res,1),find(res,0),add(res));
+// finally we free resulting matrix
+free(res);
 
+return NULL;
 
 
 
