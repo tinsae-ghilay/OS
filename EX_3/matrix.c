@@ -194,9 +194,9 @@ int main()
             printf("Thread did not join");
         }
     }
-     // we free first and second matrices as we are done with them
-     free(m_1);
-     free(m_2);
+    // we free first and second matrices as we are done with them
+    free(m_1);
+    free(m_2);
 
     printf("\n%d threads done\n", threadCount);
     printf("\nResulting matrix\n-----------------------\n");
