@@ -7,7 +7,7 @@ files = matrix.c
 # then substitute the .cpp part of $(files) with .o
 objects = matrix.o
 # executable file
-BIN = matrix
+BIN = atomic
 #g++ commands
 # g++
 CFLAG = gcc

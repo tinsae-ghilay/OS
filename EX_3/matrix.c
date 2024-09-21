@@ -28,7 +28,6 @@ struct params {
     int *res; // resulting matrix
 };
 
-
 // this calculates a cell in a matrix
 // what do we need?
 // all params will be passed to struct and to thread.
@@ -61,7 +60,6 @@ void* calculateCell(void *args)
         // add cell of m1 * m2 and add it to cell value
         cell+= (m1[i_1] * m2[i_2]);
         // slide one column in matrix 1;
-        //printf("indexes are %d and %d\n", i_1,i_2);
         i_1++;
         // and we slide down the column by one row
         i_2+= W_2;
@@ -71,6 +69,36 @@ void* calculateCell(void *args)
     // struct is created using malloc, so we free it.
     free(p);
     return (NULL);
+}
+// finds a minumum or maximum value in a matrix
+int find(int* matrix, int flag){
+
+    // size of matrix;
+    int size = W_2 * HEIGHT;
+    // min or max is assumed as the first element of array.
+    int value = matrix[0];
+    for(int i = 0; i < size; i++){
+        if(flag){ // we are looking for min
+            if (matrix[i] < value){
+                value = matrix[i];
+            }
+        }else{ // we looking for max
+            if (matrix[i] > value){
+                value = matrix[i];
+            }
+        }
+    }
+    return value;
+}
+
+// adds all items of matrix
+int add(int* matrix){
+    int sum = 0;
+    for(int i = 0; i < W_2 * HEIGHT; i++){
+
+        sum+= matrix[i];
+    }
+    return sum;
 }
 
 // Prints a matrix based on its width in a tabular mode
@@ -88,6 +116,13 @@ void printMatrix(int* matrix,int size, int width)
     }
     printf("\n");
 }
+
+// parameter to thread to find max or min
+struct matrix {
+    int flag; // 1 will mean we want min, 0 max
+    int value; // value to be returned -> min or max
+    int* mat; // the matrix
+};
 
 // I am your father.
 int main()
@@ -165,9 +200,12 @@ int main()
 
 
     printMatrix(res,res_size , W_2);
-    // and here we print our resulting matrix data
-    // max value
-    // min value
-    // and what not?
+
+    // and we print values
+    printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n",find(res,1),find(res,0),add(res));
+
+
+
+
 
 }
