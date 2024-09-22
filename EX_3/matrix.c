@@ -159,7 +159,6 @@ int main()
     // resulting matrix size and innitialisation
     const int res_size = SIZE(HEIGHT, W_2);
     int *res = malloc(res_size * sizeof(int));
-    //int *res = malloc(res_size * sizeof(int));
 
     // since every cell in the resulting matrix has to run in a separate thread,
     // we need to start as much threads as size of resulting matrix. we can do it in a loop may be
@@ -209,8 +208,4 @@ int main()
     free(res);
 
 return 0;
-
-
-
-
 }
