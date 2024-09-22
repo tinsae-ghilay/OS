@@ -11,7 +11,7 @@
 # define HEIGHT 10 // Height of matrix 1 and resulting matrix
 
 // size of a matrix = width * height
-# define SIZE(w,h) (w*h)
+# define SIZE(w,h) (w * h)
 // Row of matrix
 # define ROW(index,width) ( index / width)
 // column of matrix
@@ -73,7 +73,7 @@ void* calculateCell(void *args)
 int find(const int* matrix, const int flag){
 
     // size of matrix;
-    const int size = W_2 * HEIGHT;
+    const int size = SIZE(W_2, HEIGHT);
     // min or max is assumed as the first element of array.
     int value = matrix[0];
     for(int i = 0; i < size; i++){
@@ -93,7 +93,7 @@ int find(const int* matrix, const int flag){
 // adds all items of matrix
 int add(const int* matrix){
     int sum = 0;
-    for(int i = 0; i < W_2 * HEIGHT; i++){
+    for(int i = 0; i < SIZE(W_2, HEIGHT); i++){
 
         sum+= matrix[i];
     }
@@ -157,7 +157,7 @@ int main()
     printMatrix(m_2,size_2 , W_2);
 
     // resulting matrix size and innitialisation
-    const int res_size = HEIGHT * W_2;
+    const int res_size = SIZE(HEIGHT, W_2);
     int *res = malloc(res_size * sizeof(int));
     //int *res = malloc(res_size * sizeof(int));
 
