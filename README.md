@@ -107,6 +107,7 @@ we use the valgrind command like the following
 ```shell
 # Assuming the executable is called program and we are in the directory
 valgrind --leak-check=yes ./program
+# For lists of detected and suppressed errors, rerun with: -s
 ```
 
 
