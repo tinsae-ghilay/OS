@@ -207,5 +207,5 @@ int main()
     // finally we free resulting matrix
     free(res);
 
-return 0;
+    return 0;
 }
