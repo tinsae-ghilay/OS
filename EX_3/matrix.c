@@ -3,7 +3,6 @@
 //
 
 #include <pthread.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,7 +11,7 @@
 # define HEIGHT 10 // Height of matrix 1 and resulting matrix
 
 // size of a matrix = width * height
-# define SIZE(w,h) (w*h)
+# define SIZE(w,h) (w * h)
 // Row of matrix
 # define ROW(index,width) ( index / width)
 // column of matrix
@@ -36,14 +35,14 @@ void* calculateCell(void *args)
     // struct that holds our arguments
     // @see above
     struct params *p  = args;
-    int index = p->index;
-    int* m1 = p->m1;
-    int* m2 = p->m2;
+    const int index = p->index;
+    const int* m1 = p->m1;
+    const int* m2 = p->m2;
     int *res = p->res;
 
     // row and column of result matrix
-    int col = COLUMN(index,W_2);
-    int row = ROW(index, W_2);
+    const int col = COLUMN(index,W_2);
+    const int row = ROW(index, W_2);
     //printf("index is %d\n",row);
 
     // starting index on column 0 of first matrix, we get the row from row of resulting matrix
@@ -71,10 +70,10 @@ void* calculateCell(void *args)
     return (NULL);
 }
 // finds a minumum or maximum value in a matrix
-int find(int* matrix, int flag){
+int find(const int* matrix, const int flag){
 
     // size of matrix;
-    int size = W_2 * HEIGHT;
+    const int size = SIZE(W_2, HEIGHT);
     // min or max is assumed as the first element of array.
     int value = matrix[0];
     for(int i = 0; i < size; i++){
@@ -92,9 +91,9 @@ int find(int* matrix, int flag){
 }
 
 // adds all items of matrix
-int add(int* matrix){
+int add(const int* matrix){
     int sum = 0;
-    for(int i = 0; i < W_2 * HEIGHT; i++){
+    for(int i = 0; i < SIZE(W_2, HEIGHT); i++){
 
         sum+= matrix[i];
     }
@@ -128,15 +127,10 @@ struct matrix {
 int main()
 {
     // size of first array
-    int size_1 = SIZE(W_1,HEIGHT);
+    const int size_1 = SIZE(W_1,HEIGHT);
 
     // first matrix
-    // check malloc(), if allocation failed-> error
     int *m_1 = malloc(size_1 * sizeof(int));
-    if(m_1 == NULL){
-        perror("Error allocating memory for first Matrix");
-        exit(1);
-    }
 
     // setting random values for matrix 1
     for(int i = 0; i < size_1; i++){
@@ -148,17 +142,10 @@ int main()
     printMatrix(m_1,size_1, W_1);
 
     // size of second matrix
-    int size_2 = SIZE(W_1,W_2);
+    const int size_2 = SIZE(W_1,W_2);
 
     // second matrix
-    //int m_2[size_2] = {};
     int *m_2 = malloc(size_2 * sizeof(int));
-    // check malloc(), if allocation failed-> error
-    if(m_2 == NULL){
-        perror("Error allocating memory for second Matrix");
-        free(m_1);
-        exit(1);
-    }
 
     // filling second matrix with random values
     for(int i = 0; i < size_2; i++){
@@ -170,16 +157,9 @@ int main()
     printMatrix(m_2,size_2 , W_2);
 
     // resulting matrix size and innitialisation
-    int res_size = HEIGHT * W_2;
-    //int res[res_size] = {};
+    const int res_size = SIZE(HEIGHT, W_2);
     int *res = malloc(res_size * sizeof(int));
-    // check malloc(), if allocation failed-> error
-    if(res == NULL){
-        perror("Error allocating memory for resulting Matrix");
-        free(m_1);
-        free(m_2);
-        exit(1);
-    }
+    //int *res = malloc(res_size * sizeof(int));
 
     // since every cell in the resulting matrix has to run in a separate thread,
     // we need to start as much threads as size of resulting matrix. we can do it in a loop may be
@@ -194,14 +174,6 @@ int main()
 
         // struct to hold our parameters - @ see struct above
         struct params *pr = malloc(sizeof(struct params));
-        // if we encounter error while allocating memory for thread data, we exit
-        if(pr == NULL){
-            perror("Error allocating memory for resulting Matrix");
-            free(m_1);
-            free(m_2);
-            free(res);
-            exit(1);
-        }
         pr->index = i;
         pr->m1 = m_1;
         pr->m2 = m_2;
@@ -221,6 +193,9 @@ int main()
             printf("Thread did not join");
         }
     }
+    // we free first and second matrices as we are done with them
+    free(m_1);
+    free(m_2);
 
     printf("\n%d threads done\n", threadCount);
     printf("\nResulting matrix\n-----------------------\n");
@@ -229,8 +204,13 @@ int main()
     printMatrix(res,res_size , W_2);
 
     // and we print values
-    printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n",find(res,1),find(res,0),add(res));
-    free(m_1);
-    free(m_2);
+    printf("\nMinimaler Wert: %d; Maximaler Wert: %d; Summe aller Werte: %d\n\n",find(res,1),find(res,0),add(res));
+    // finally we free resulting matrix
     free(res);
+
+return 0;
+
+
+
+
 }
