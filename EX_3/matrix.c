@@ -3,7 +3,6 @@
 //
 
 #include <pthread.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -182,7 +181,7 @@ int main()
     }
 
     // since every cell in the resulting matrix has to run in a separate thread,
-    // we need to start as much threads as size of resulting matrix. we can do it in a loop may be
+    // we need to start as much threads as size of resulting matrix. we can do it in a loop.
     // and to help us during Joining, we keep count of created threads
     int threadCount = 0;
 

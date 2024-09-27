@@ -21,7 +21,7 @@ all: $(BIN)
 
 # create executable from object files
 $(BIN): $(objects)
-	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lpthread
+	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects) -pthread
 
 # create object files from source files
 %.o: %.c
