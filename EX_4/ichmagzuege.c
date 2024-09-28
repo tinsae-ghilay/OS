@@ -7,7 +7,6 @@
 # include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
-#include <sys/types.h>
 
 // test with 10 trains
 #define THREAD_COUNT 10
