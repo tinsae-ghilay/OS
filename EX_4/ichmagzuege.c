@@ -59,16 +59,27 @@ int main()
 
     // creating threads
     int *ids = malloc(THREAD_COUNT * sizeof(int));
+    if(ids == NULL){
+        perror("Error allocating memory for ids");
+        exit(1);
+    }
     for(int i = 0; i < THREAD_COUNT; i++){
         ids[i] = i+1;
     }
     pthread_t threads[THREAD_COUNT];
     for(int i = 0; i < THREAD_COUNT; i++){
         Train *t = malloc(sizeof(Train));
+        if(t == NULL){
+            perror("Error allocating memory for Thread data");
+            free(ids);
+            exit(1);
+        }
         sprintf(t->name,"Zug nummer %d",i+1);
         t->duration = (rand()%3)+1;
         if(pthread_create(&threads[i], NULL, &threadFunc, t)){
             perror("Error creating threads");
+            free(t);
+            free(ids);
             exit(1);
         }
     }
