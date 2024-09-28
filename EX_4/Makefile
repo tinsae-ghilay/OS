@@ -1,31 +1,28 @@
-# source files
+# simple make file for task 1
 # no need to explain a wildcard in name and sign
-files = $(wildcard *.c)
-# object files instead of listing them.
-# this way we have our make file always working,
-# so long as files are in the same folder
-# then substitute the .cpp part of $(files) with .o
-objects = $(patsubst %.c,%.o,$(files))
 # executable file
 BIN = consumerproducer
 #g++ commands
 # g++
 CFLAG = gcc
 # C++ version to compile to
-VFLAG = -std=c++2a
+# VFLAG = -std=c++11
 # error handling flags
 WFLAG = -Wall -Werror
 
 # rules
 all: $(BIN)
 
+consumerproducer.o : consumerproducer.c
+	$(CFLAG) $(VFLAG) $(WFLAG) -g -c consumerproducer.c
+    
+    
+circularbuffer.o:  circularbuffer.c circularbuffer.h
+	$(CFLAG) $(VFLAG) $(WFLAG) -g -c circularbuffer.c
+    
 # create executable from object files
-$(BIN): $(objects)
-	$(CFLAG) $(VFLAG) $(WFLAG) -g -o $(BIN) $(objects) -pthread
-
-# create object files from source files
-%.o: %.cpp
-	$(CFLAG) $(VFLAG) $(WFLAG) -g -c $< -o $@
+$(BIN): consumerproducer.o circularbuffer.o
+	$(CFLAG) $(WFLAG) -g -o $(BIN) consumerproducer.o circularbuffer.o -pthread
 
 # run the program
 run: $(BIN)
@@ -33,4 +30,4 @@ run: $(BIN)
 # clean
 .PHONY:clean
 clean:
-	rm -f $(BIN) *.o
+	rm -f $(BIN) consumerproducer.o circularbuffer.o

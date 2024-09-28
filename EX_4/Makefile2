@@ -1,0 +1,30 @@
+# simple make file for task 2
+# no need to explain a wildcard in name and sign
+# executable file
+BIN = ichmagzuege
+#g++ commands
+# g++
+CFLAG = gcc
+# C++ version to compile to
+# VFLAG = -std=c++11
+# error handling flags
+WFLAG = -Wall -Werror
+
+# rules
+all: $(BIN)
+
+ichmagzuege.o : ichmagzuege.c
+	$(CFLAG) $(VFLAG) $(WFLAG) -g -c ichmagzuege.c
+    
+    
+# create executable from object files
+$(BIN): ichmagzuege.o
+	$(CFLAG) $(WFLAG) -g -o $(BIN) ichmagzuege.o -pthread
+
+# run the program
+run: $(BIN)
+	./${BIN}
+# clean
+.PHONY:clean
+clean:
+	rm -f $(BIN) ichmagzuege.o

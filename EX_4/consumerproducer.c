@@ -39,7 +39,7 @@ void* consumer_function(void* arg) {
     return NULL;
 
 }
-/*int main(void)
+int main(void)
 {
     int average = 0;
     cb_init(&buffer,7);
@@ -62,4 +62,4 @@ void* consumer_function(void* arg) {
     cb_destroy(&buffer);
 
     return 0;
-}*/
+}
