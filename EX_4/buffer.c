@@ -54,17 +54,20 @@ int isEmpty(const CircularBuffer *buffer)
 // init buffer. we allocate memory to buffer and its container.
 CircularBuffer *init(const int size)
 {
+    // allocate memory to buffer and null check
     CircularBuffer *buffer = malloc(sizeof(CircularBuffer));
     if(buffer == NULL) {
         fprintf(stderr, "Error alocating memory to buffer\n");
         return  NULL;
     }
+    // allocate memory to buffer container and null check
     buffer->container = malloc(sizeof(int) * size);
     if(buffer->container == NULL) {
         fprintf(stderr, "Error alocating memory to buffer container\n");
         free(buffer);
         return  NULL;
     }
+    // and set the default values for all members
     buffer->size = size;
     buffer->r_index = 0;
     buffer->w_index = 0;
@@ -74,7 +77,7 @@ CircularBuffer *init(const int size)
 
 // we free buffer and its container
 void free_buffer(CircularBuffer *buffer) {
-
+    // here both buffer and the buffer container should be freed
     free(buffer->container);
     free(buffer);
 }

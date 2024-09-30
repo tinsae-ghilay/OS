@@ -20,8 +20,6 @@ int enqueue(CircularBuffer *buffer, int value);
 
 int isEmpty(const CircularBuffer *buffer);
 
-int isFull(const CircularBuffer *buffer);
-
 CircularBuffer *init(int size);
 
 void free_buffer(CircularBuffer *buffer);

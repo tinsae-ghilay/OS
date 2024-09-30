@@ -91,10 +91,10 @@ void *produce(void *arg){
             printf("Temprature sensor %d wurde schlafengelegt!\n",id);
             pthread_cond_wait(&p_cond, &mutex);
             printf("Temprature sensor %d wurde aufgeweckt!\n", id);
+            sleep(SLEEP_SEC);
         }
         // fill buffer while we can
         while(enqueue(b,(rand() % 50)) && !done_testing);
-        sleep(SLEEP_SEC);
         // signal when done filling
         pthread_cond_signal(&c_cond);
     }
