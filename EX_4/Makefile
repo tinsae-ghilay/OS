@@ -17,12 +17,12 @@ consumerproducer.o : consumerproducer.c
 	$(CFLAG) $(VFLAG) $(WFLAG) -g -c consumerproducer.c
     
     
-circularbuffer.o:  circularbuffer.c circularbuffer.h
-	$(CFLAG) $(VFLAG) $(WFLAG) -g -c circularbuffer.c
+buffer.o:  buffer.c buffer.h
+	$(CFLAG) $(VFLAG) $(WFLAG) -g -c buffer.c
     
 # create executable from object files
-$(BIN): consumerproducer.o circularbuffer.o
-	$(CFLAG) $(WFLAG) -g -o $(BIN) consumerproducer.o circularbuffer.o -pthread
+$(BIN): consumerproducer.o buffer.o
+	$(CFLAG) $(WFLAG) -g -o $(BIN) consumerproducer.o buffer.o -pthread
 
 # run the program
 run: $(BIN)
@@ -30,4 +30,4 @@ run: $(BIN)
 # clean
 .PHONY:clean
 clean:
-	rm -f $(BIN) consumerproducer.o circularbuffer.o
+	rm -f $(BIN) consumerproducer.o buffer.o
