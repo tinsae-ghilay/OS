@@ -63,7 +63,9 @@ void *consume(void *arg){
         }
         // signal in case other threads are waiting
         pthread_cond_signal(&p_cond);
+        // average temp = temp/ buffer size
         printf("Current average temprature : %d°C\n",temp/b->size);
+        // reset temp value so it doesnt get added on next calculation
         temp = 0;
 	}
     // we are done, so broadcast condition to notify any threads that may be waiting
