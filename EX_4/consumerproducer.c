@@ -35,8 +35,8 @@ void cleanUp(){
 // consumer thread function
 // locks circulr buffer (this is a critical region)
 // if buffer is not empty reads data(random number)
-// adds it to previously calculated temprature
-// devides the result by 2 and calls it average temprature
+// adds all values and divides their sum by buffer size.
+// and resets temp value to 0 (clean slate start)
 // -> if buffer is empty, thread sleeps and notifies producer threads.
 void *consume(void *arg){
     // variable to hold immidiate read value
