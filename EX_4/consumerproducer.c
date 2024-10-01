@@ -127,8 +127,9 @@ int main()
     int temprature = 0, one = 1, two = 2;
     // create threads
     if(pthread_create(&producer1,NULL,&produce,&one) ||
-    pthread_create(&producer2,NULL,&produce,&two)||
-    pthread_create(&consumer,NULL,&consume,&temprature)){
+        pthread_create(&producer2,NULL,&produce,&two)||
+        pthread_create(&consumer,NULL,&consume,&temprature))
+{
         fprintf(stderr,"Error creating one of the threads\n");
         cleanUp();
     }
