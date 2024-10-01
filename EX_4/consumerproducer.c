@@ -35,8 +35,8 @@ void cleanUp(){
 // consumer thread function
 // locks circulr buffer (this is a critical region)
 // if buffer is not empty reads data(random number)
-// adds it to previously calculated temprature
-// devides the result by 2 and calls it average temprature
+// adds all values and divides their sum by buffer size.
+// and resets temp value to 0 (clean slate start)
 // -> if buffer is empty, thread sleeps and notifies producer threads.
 void *consume(void *arg){
     // variable to hold immidiate read value
@@ -63,7 +63,9 @@ void *consume(void *arg){
         }
         // signal in case other threads are waiting
         pthread_cond_signal(&p_cond);
+        // average temp = temp/ buffer size
         printf("Current average temprature : %d°C\n",temp/b->size);
+        // reset temp value so it doesnt get added on next calculation
         temp = 0;
 	}
     // we are done, so broadcast condition to notify any threads that may be waiting
@@ -125,8 +127,9 @@ int main()
     int temprature = 0, one = 1, two = 2;
     // create threads
     if(pthread_create(&producer1,NULL,&produce,&one) ||
-    pthread_create(&producer2,NULL,&produce,&two)||
-    pthread_create(&consumer,NULL,&consume,&temprature)){
+        pthread_create(&producer2,NULL,&produce,&two)||
+        pthread_create(&consumer,NULL,&consume,&temprature))
+{
         fprintf(stderr,"Error creating one of the threads\n");
         cleanUp();
     }
