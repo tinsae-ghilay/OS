@@ -8,7 +8,7 @@
 # include <unistd.h>
 
 // test count
-#define TEST_COUNT 3
+#define TEST_COUNT 10
 #define SLEEP_SEC 1
 
 // flag to let threads know test should end
