@@ -59,7 +59,7 @@ void * threadFunc(void* args){
 
 int main()
 {
-    // lets init thread and check its success
+    // lets init semaphore and check its success
     if(sem_init(&semaphore, 0, 3)){
         perror("Error initiating Semaphore");
 
