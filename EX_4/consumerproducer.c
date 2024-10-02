@@ -48,8 +48,7 @@ void *consume(void *arg){
 
     // we continue lock while testing is in progress
     while(!done_testing){
-
-		while(isEmpty(b)){ //while buffer is empty
+        while(isEmpty(b)){ //while buffer is empty
             // thread should give up lock until buffer is not empty
             printf("Logging Programm wurde schlafengelegt!\n");
             pthread_cond_wait(&c_cond, &mutex);
