@@ -76,7 +76,8 @@ CircularBuffer *init(const int size)
 }
 
 // we free buffer and its container
-void free_buffer(CircularBuffer *buffer) {
+void free_buffer(CircularBuffer *buffer) 
+{
     // here both buffer and the buffer container should be freed
     free(buffer->container);
     free(buffer);
