@@ -24,7 +24,8 @@ CircularBuffer *b;
 
 // frees memory allocated in circular buffer
 // calls destroy on condition variables and mutex
-void cleanUp(){
+void cleanUp()
+{
     // free allocated memory and destroy mutex and conditions
     pthread_cond_destroy(&c_cond);
     pthread_cond_destroy(&p_cond);
@@ -38,7 +39,8 @@ void cleanUp(){
 // adds all values and divides their sum by buffer size.
 // and resets temp value to 0 (clean slate start)
 // -> if buffer is empty, thread sleeps and notifies producer threads.
-void *consume(void *arg){
+void *consume(void *arg)
+{
     // variable to hold immidiate read value
     int t = 0;
     // variable to hold average temprature value
@@ -74,7 +76,8 @@ void *consume(void *arg){
     return NULL;
 }
 
-void *produce(void *arg){
+void *produce(void *arg)
+{
 
     // geting id from arg as we pass it when craeting thread
     // we could get thread id from system by including <sys/syscall.h> with id = syscall(SYS_gettid).
