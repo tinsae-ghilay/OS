@@ -90,6 +90,7 @@ int main()
     for(int i = 0; i < THREAD_COUNT; i++){
         pthread_join(threads[i], NULL);
     }
+    // destroy semaphore
     sem_destroy(&semaphore);
     return EXIT_SUCCESS;
 }
