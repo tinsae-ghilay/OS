@@ -75,7 +75,7 @@ int main()
             perror("Error allocating memory for Thread data");
             exit(1);
         }
-        // setting train attrinute (member) values
+        // setting train attribute (member) values
         sprintf(t->name,"ZN%d",i+1);
         t->duration = (rand()%3);
         usleep(rand()%700000);
