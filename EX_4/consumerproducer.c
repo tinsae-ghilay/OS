@@ -124,14 +124,15 @@ int main()
     // threads
     pthread_t consumer,producer1, producer2;
     // we could get exact thread Id's using pthread_self() but that doesnt help.
-    int temprature = 0, one = 1, two = 2;
+    int temprature = 0, s_one = 1, s_two = 2;
     // create threads
-    if(pthread_create(&producer1,NULL,&produce,&one) ||
-        pthread_create(&producer2,NULL,&produce,&two)||
+    if(pthread_create(&producer1,NULL,&produce,&s_one) ||
+        pthread_create(&producer2,NULL,&produce,&s_two)||
         pthread_create(&consumer,NULL,&consume,&temprature))
 {
         fprintf(stderr,"Error creating one of the threads\n");
         cleanUp();
+        return EXIT_FAILURE;
     }
 
     // wait and join
@@ -144,5 +145,5 @@ int main()
 
     // clean up buffer, conditions and mutex
     cleanUp();
-    return 0;
+    return EXIT_SUCCESS;
 }

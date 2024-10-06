@@ -1,0 +1,14 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/tgk/Documents/GitHub/OS/EX_5",
+            "binaryPath": "/home/tgk/Documents/GitHub/OS/EX_5/myShell",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "/home/tgk/Documents/GitHub/OS/EX_5",
+            "binaryPath": "/home/tgk/Documents/GitHub/OS/EX_5/myShellPiping",
+            "binaryArgs": []
+        }
+    ]
+}

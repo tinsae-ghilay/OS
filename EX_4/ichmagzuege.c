@@ -49,7 +49,7 @@ void * threadFunc(void* args){
     printf("Fahrterlaubnis für %s wurde erteilt! \n", t->name);
     sleep(t->duration);
     // and post when done
-    sem_post(&semaphore);
+    sem_post(&semaphore); 
 
     // and free thread data
     free(t);
