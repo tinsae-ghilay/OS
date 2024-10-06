@@ -59,7 +59,7 @@ void * threadFunc(void* args){
 
 int main()
 {
-    // lets init thread and check its success
+    // lets init semaphore and check its success
     if(sem_init(&semaphore, 0, 3)){
         perror("Error initiating Semaphore");
 
@@ -75,7 +75,7 @@ int main()
             perror("Error allocating memory for Thread data");
             exit(1);
         }
-        // setting train attrinute (member) values
+        // setting train attribute (member) values
         sprintf(t->name,"ZN%d",i+1);
         t->duration = (rand()%3);
         usleep(rand()%700000);
@@ -90,6 +90,7 @@ int main()
     for(int i = 0; i < THREAD_COUNT; i++){
         pthread_join(threads[i], NULL);
     }
+    // destroy semaphore
     sem_destroy(&semaphore);
     return EXIT_SUCCESS;
 }
