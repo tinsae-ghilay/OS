@@ -12,7 +12,7 @@
 
 // declaring acceptable number of Proccesses that can be run
 # define P_COUNT 5
-// reader end of pipe
+// read end of pipe
 # define READER 0
 // write end of pipe
 # define WRITER 1
@@ -149,6 +149,8 @@ int main()
 {
     // endless loop because we will keep our program open untill user enters 'exit'
     while(1){
+        // set value of x to 0
+        x = 0;
         handleSignal();
         // first prompt
         printf("> ");
@@ -252,7 +254,6 @@ int main()
         for(int i = 0; i < x; i++){
             wait(NULL);
         }
-        x=0;
     }
     return EXIT_SUCCESS;
 
