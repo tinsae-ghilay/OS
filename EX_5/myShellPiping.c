@@ -45,6 +45,8 @@ void graceful_shutdown_handler(int signum) {
             int pid = getpid();
             // will try this later
             kill(pid,signum);
+            // or
+            // raise(signum);
             //exit(EXIT_SUCCESS);
         }else{
             printf("OK. Staying\n");
