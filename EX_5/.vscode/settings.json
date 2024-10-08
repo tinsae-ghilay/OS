@@ -10,5 +10,7 @@
             "binaryPath": "/home/tgk/Documents/GitHub/OS/EX_5/myShellPiping",
             "binaryArgs": []
         }
-    ]
+    ],
+    "editor.fontSize": 18,
+    "terminal.integrated.fontSize": 15
 }
