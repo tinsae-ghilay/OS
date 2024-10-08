@@ -44,10 +44,12 @@ void graceful_shutdown_handler(int signum) {
             printf("myShellPiping has been closed, Good bye!\n");
             int pid = getpid();
             // will try this later
-            kill(pid,signum);
+            //kill(pid,signum);
             // or
             // raise(signum);
-            //exit(EXIT_SUCCESS);
+            // kill or raise don't exit proccess correctly
+            // so exit is better
+            exit(EXIT_SUCCESS);
         }else{
             printf("OK. Staying\n");
         }
