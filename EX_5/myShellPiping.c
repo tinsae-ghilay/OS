@@ -27,7 +27,7 @@ void graceful_shutdown_handler(int signum) {
     // kill the proccess
     if(has_child_processes > 1){ // we have child proccesse so we kill them
         for(int i = 1; i < x; i++){
-            kill(pids[i],SIGTERM);
+            kill(pids[i],signum);
         }
         has_child_processes = 0;
         printf("\nChild proccesses killed\n");
@@ -43,7 +43,11 @@ void graceful_shutdown_handler(int signum) {
         if (yes) {
             printf("myShellPiping has been closed, Good bye!\n");
             int pid = getpid();
-            exit(EXIT_SUCCESS);
+            // will try this later
+            kill(pid,signum);
+            // or
+            // raise(signum);
+            //exit(EXIT_SUCCESS);
         }else{
             printf("OK. Staying\n");
         }
