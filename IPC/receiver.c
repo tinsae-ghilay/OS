@@ -3,7 +3,6 @@
 # include <stdlib.h>
 # include <string.h>
 # include "messagequeue.h"
-# include "sharedmemory.h"
 
 int main(void) {
 
