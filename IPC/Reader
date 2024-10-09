@@ -1,0 +1,36 @@
+# source files
+# no need to explain a wildcard in name and sign
+files = sh_receiver.c sharedmemory.c
+# object files instead of listing them.
+# this way we have our make file always working,
+# so long as files are in the same folder
+# then substitute the .cpp part of $(files) with .o
+objects = sh_receiver.o sharedmemory.o
+# executable file
+BIN = sh_receiver
+#g++ commands
+# g++
+CFLAG = gcc
+# C++ version to compile to
+# VFLAG = -std=c++11
+# error handling flags
+WFLAG = -Wall -Werror
+
+# rules
+all: $(BIN)
+
+# create executable from object files
+$(BIN): $(objects)
+	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lrt
+
+# create object files from source files
+%.o: %.c
+	$(CFLAG) $(VFLAG) $(WFLAG) -g -c $< -o $@
+
+# run the program
+run: $(BIN)
+	./${BIN}
+# clean
+.PHONY:clean
+clean:
+	rm -f $(BIN) $(objects)
