@@ -16,7 +16,9 @@
 
 typedef struct
 {
+    // the actual message
     char buff[MSG_SIZE];
+    // flag set to 1 if new message arrives
     int read;
 } shared_data_t;
 
