@@ -1,3 +1,13 @@
+/*
+ * sharedmemory.c
+ *
+ * Created on Thu Oct 09 2024
+ *
+ * created by 2024 Kahsay Tinsae Ghilay
+ * Matricle Nummer 01640282
+ *
+ * Written for the course Operating Systems
+ */
 
 # include "sharedmemory.h"
 # include <stdio.h>

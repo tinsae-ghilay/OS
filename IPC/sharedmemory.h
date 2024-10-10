@@ -1,3 +1,14 @@
+/*
+ * sharedmemory.h
+ *
+ * Created on Thu Oct 09 2024
+ *
+ * created by 2024 Kahsay Tinsae Ghilay
+ * Matricle Nummer 01640282
+ *
+ * Written for the course Operating Systems
+ */
+
 # ifndef SHAREDMEMORY_H
 # define SHAREDMEMORY_H
 

@@ -1,3 +1,13 @@
+/*
+ * messagequeue.h
+ *
+ * Created on Thu Oct 08 2024
+ *
+ * created by 2024 Kahsay Tinsae Ghilay
+ * Matricle Nummer 01640282
+ *
+ * Written for the course Operating Systems
+ */
 
 #ifndef MESSAGEQUEUE_H
 #define MESSAGEQUEUE_H
