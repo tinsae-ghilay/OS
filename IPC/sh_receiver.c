@@ -4,9 +4,14 @@
  * Created on Thu Oct 09 2024
  * 
  * created by Kahsay Tinsae Ghilay
- * Matricle Nummer 01640282
+ * Matricle Nummer ********
  * 
  * Written for the course Operating Systems
+ * 
+ * 
+ * A process that shares a memory with another
+ * reads the shared memory and prints the value sets read flag to 1
+ * sleeps if there is no new value
  */
 
 # include <stdio.h>

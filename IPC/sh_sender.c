@@ -4,9 +4,14 @@
  * Created on Thu Oct 09 2024
  *
  * created by Kahsay Tinsae Ghilay
- * Matricle Nummer 01640282
+ * Matricle Nummer ********
  *
  * Written for the course Operating Systems
+ * 
+ * 
+ * A process that shares a memory with another
+ * writes a string to shared memory and sets it'S read flag to 0
+ * gets input from user(stdin)
  */
 
 # include <stdio.h>

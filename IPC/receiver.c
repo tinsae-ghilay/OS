@@ -5,9 +5,13 @@
  * Created on Thu Oct 08 2024
  *
  * created by Kahsay Tinsae Ghilay
- * Matricle Nummer 01640282
+ * Matricle Nummer ********
  *
  * Written for the course Operating Systems
+ * 
+ * A proccess that receives message from another 
+ * using messageQueue
+ * checks if new message is sent and prints the message
  */
 
 #include <stdio.h>

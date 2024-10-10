@@ -4,9 +4,15 @@
  * Created on Thu Oct 08 2024
  *
  * created by Kahsay Tinsae Ghilay
- * Matricle Nummer 01640282
+ * Matricle Nummer ********
  *
  * Written for the course Operating Systems
+ * 
+ * 
+ * A proccess that sends message to another proccess
+ * using messageQueue
+ * gets input from user (stdin)
+ * sends it to messageQueue
  */
 
 # include <stdio.h>

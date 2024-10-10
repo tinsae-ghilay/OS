@@ -4,9 +4,14 @@
  * Created on Thu Oct 08 2024
  *
  * created by Kahsay Tinsae Ghilay
- * Matricle Nummer 01640282
+ * Matricle Nummer ********
  *
  * Written for the course Operating Systems
+ * 
+ * 
+ * misc functions to create messagequeue
+ * send message through messageQueue
+ * close and unlink messageQueue
  */
 
 # include "messagequeue.h"

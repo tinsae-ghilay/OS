@@ -4,9 +4,12 @@
  * Created on Thu Oct 09 2024
  *
  * created by Kahsay Tinsae Ghilay
- * Matricle Nummer 01640282
+ * Matricle Nummer ********
  *
  * Written for the course Operating Systems
+ * 
+ * Header file for sharedmemory.c
+ * declares functions to create and manage shared memory
  */
 
 # ifndef SHAREDMEMORY_H
@@ -17,7 +20,7 @@
 
 // shared memory name
 # define SH_NAME "/sharedmemory"
-// permission
+// permission RW,RW,R
 # define PERMISSION 0664
 
 // shared momory size
