@@ -107,10 +107,10 @@ we use the valgrind command like the following
 ```shell
 # Assuming the executable is called program and we are in the directory
 valgrind --leak-check=yes ./program
-
 # For lists of detected and suppressed errors, rerun with: -s as follows
-valgrind -s --leak-check=yes ./program
+valgrind -s --leak-check=full ./program
 ```
+More on Valgrind [here](https://valgrind.org/docs/manual/mc-manual.html)
 
 
 # Bios
