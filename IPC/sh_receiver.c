@@ -22,10 +22,10 @@ int main()
     //TODO("Works but it doesnt seem this is how shared memory is used");
     // this loop runs the fan like it is on adrenalin
     while(msg != NULL){
-        // if message is already read we do nothing
-        if(msg->read){
-            usleep(10000);
-            continue;
+        // if message is already read we do nothing.
+        // but sleep for quarter of a second (hopefully nobody notices).
+        while(msg->read){
+            usleep(25000);
         }
         // we can also add an exit mechanism like we did in ms_queue
         // by comparing string with keyword of our choice
