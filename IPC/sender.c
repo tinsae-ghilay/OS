@@ -1,8 +1,7 @@
-#include <stdio.h>
+# include <stdio.h>
 # include <mqueue.h>
 # include <stdlib.h>
 # include <string.h>
-
 # include "messagequeue.h"
 
 int main(void) {
