@@ -14,10 +14,12 @@
 #include <fcntl.h>
 # include <stdlib.h>
 # include <signal.h>
+# include <errno.h>
 
 // exit on error
 static void fin(char *msg){
     perror(msg);
+	unlinkShared();
     exit(EXIT_FAILURE);
 }
 
@@ -35,17 +37,32 @@ int createSharedForRead()
 int createSharedForWrite()
 {
     // Create the shared memory object
-	int shm = shm_open(SH_NAME, O_CREAT | O_RDWR, PERMISSION);
+	int shm = shm_open(SH_NAME, O_CREAT| O_EXCL | O_RDWR, PERMISSION);
+	// this may not be needed but since specificaly asked
+	// EEXIST : Both O_CREAT and O_EXCL were specified to shm_open() and
+    // the shared memory object specified by name already exists.
+	// (source:https://man7.org/linux/man-pages/man3/shm_open.3.html)
+	if(errno == EEXIST){
+		fprintf(stderr,"Error: segment with the name %s already exists\n", SH_NAME);
+		fin("Error");
+	}
+	// On success, shm_open() returns a file descriptor (a nonnegative integer)
 	if (shm == -1) {
 		fin("Error creating shared memory for Write");
 	}
+	// on success we return file descriptor
     return shm;
 }
+
 
 // Configure the size of the shared memory segment
 void configureMem(int memd, int size)
 {
+	// On success, zero is returned.  On error, -1 is returned, and
+    // errno is set to indicate the error.
+	// (source: https://man7.org/linux/man-pages/man2/ftruncate.2.html)
     if(ftruncate(memd,size) == -1){
+		close(memd);
         fin("Error configuring memory size");
     }
 }
@@ -58,7 +75,11 @@ void* mapSegment(int memd, int size)
     // address of memory segment
     void* seg = mmap(0,size,PROT_WRITE,MAP_SHARED,memd,0);
 
+	// On success, mmap() returns a pointer to the mapped area.  On
+    // error, the value MAP_FAILED (that is, (void *) -1) is returned,
+    // and errno is set to indicate the error. (source:https://man7.org/linux/man-pages/man2/mmap.2.html)
     if(seg == MAP_FAILED){ // not mapped
+		close(memd);
         fin("Error maping Shared segment to memory");
     }
 
@@ -69,6 +90,9 @@ void* mapSegment(int memd, int size)
 // we pass the pointer to the segment
 void unmapShared(void* adr, int size)
 {
+	// On success, munmap() returns 0.  On failure, it returns -1, and
+    // errno is set to indicate the error (probably to EINVAL).
+	// (source: https://man7.org/linux/man-pages/man2/munmap.2.html)
 	if (munmap(adr, size) == -1) { // unable to unmap
 		fin("Could not unmap the shared memory segment from memory");
 	}
@@ -77,6 +101,8 @@ void unmapShared(void* adr, int size)
 // unlink shared memory
 void unlinkShared()
 {
+	// On success, shm_unlink() returns 0.
+	// (source:https://man7.org/linux/man-pages/man3/shm_open.3.html)
     if(shm_unlink(SH_NAME)){
         fin("Error unlinking shared memory");
     }

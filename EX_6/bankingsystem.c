@@ -26,48 +26,56 @@
 # define CREDIT 5000
 
 
+/*
+
+Legen Sie ein Shared-Memory Segment (ob Sie System-V oder POSIX Shared-Memory dafür verwenden, bleibt Ihnen überlassen) an. 
+Wenn schon ein Shared-Memory Segment mit demselben Namen existiert, 
+dann soll eine entsprechende Fehlermeldung auf stderr ausgegeben und das Programm beendet werden. 
+In diesem Shared-Memory Segment soll das Array mit den Konten abgelegt werden.
+*/
+
+// account structure -> holds amount and credit status
 typedef struct account{
     int amount;
     int credit;
 
 }account;
 
+// data to be stored in shared memory
+// includes mutex and account
 typedef struct sh_attr{
     account acounts[ACCOUNTS_SIZE][sizeof(account)];
     pthread_mutex_t *mutex;
 }sh_attr;
 
+// child process pids
 pid_t pids[5];
+int server;
 
+// shared mem attribute(data)
 sh_attr *shared_data;
 
-// parent pid
-pid_t parent = 0;
 
-
-/*
-
-    Legen Sie ein Shared-Memory Segment (ob Sie System-V oder POSIX Shared-Memory dafür verwenden, bleibt Ihnen überlassen) an. 
-    Wenn schon ein Shared-Memory Segment mit demselben Namen existiert, 
-    dann soll eine entsprechende Fehlermeldung auf stderr ausgegeben und das Programm beendet werden. 
-    In diesem Shared-Memory Segment soll das Array mit den Konten abgelegt werden.
-*/
 /*
     Schreiben Sie eine Funktion clientAccessAccount(), 
     die eine bestimme Geldsumme (wird als Parameter übergeben) von einem bestimmten Konto 
     (wird auch als Parameter übergeben) abbucht oder hinzubucht (davon abhängig, 
     ob die Geldsumme positiv oder negativ ist).
 */
-
-void clientAccessAccount(account *account, int amount)
+// critical region syncronised using Mutex
+// changes amount (stored in shared memory)
+void clientAccessAccount(int acct, int amount)
 {
+    // critical region
     //printf("> gettin to lock\n");
     pthread_mutex_lock(shared_data->mutex);
     //printf("> got lock lock\n");
-    account->amount+= amount; // getting stuck here
+    // once we have lock we change value
+    shared_data->acounts[acct]->amount+= amount;
     srand(time(NULL));
-    usleep(rand() % 1000);
+    //usleep(rand() % 1000);
     //printf("Done work on child process\n");
+    // and we unlock
     pthread_mutex_unlock(shared_data->mutex);
 
 }
@@ -80,18 +88,25 @@ void clientAccessAccount(account *account, int amount)
     Für jedes Konto soll die gesamte Kreditsumme (Summe aller individuellen Kredite) 
     im Shared-Memory Segment abgespeichert werden.
 */
+
+// critical region
+// reads data stored in shared memory
+// updates credit (stored in shared memory)
+// uses mutex for synchronisation
 void serverReadAccounts()
 {
-
     for(int i = 0; i < ACCOUNTS_SIZE; i++){
 
         // mutex lock on single account
         pthread_mutex_lock(shared_data->mutex);
+        // if amount is below 0
+        // add some credit and update amount
         if(shared_data->acounts[i]->amount < 0){
             shared_data->acounts[i]->amount+= CREDIT;
             shared_data->acounts[i]->credit+= CREDIT;
         }
-        // unlock mutex
+        // unlock mutex, we only need it when we write
+        // after this we only do reading.
         pthread_mutex_unlock(shared_data->mutex);
         if((i+1) % 3 == 0){
             printf("\t %d :\t %d \n",i,shared_data->acounts[i]->amount);
@@ -115,7 +130,7 @@ void sig_handle(int signum){
     
     if(signum == SIGALRM){ // signal is an alarm
         // we print account status
-        printf("Accounts status : {\n");
+        printf("Accounts balances : {\n");
         serverReadAccounts();
         printf(" }\n");
         return;
@@ -123,18 +138,26 @@ void sig_handle(int signum){
     // SIGTERM or other signal received?
     char buff[64];
     // we prompt user is indeed wants to exit
-    printf("\nYou really want to quite transactions? [y/n] ");
+    printf("\nYou really want to quite? [y/n] ");
     fgets(buff, 64,stdin);
     // does user reall want to exit?
     if(strncmp(buff, "y", 1) == 0){
         // first we kill all child processes
         for(int i = 0; i < 5; i++){
+            // in killing all processes, we are losing the chance to free some memory
+            // and we cannot unlink shared memory too.
+            // so shared memory persists, ane we have "already exists " error whn we restart program
+            // atleast I think that is sthe reason.
+            // but I dont know any other way.
             kill(pids[i],signum);
         }
+    }
+    //unmapShared(&server,sizeof(sh_attr));
+    unlinkShared();
+    
     // the we exit parent process normally
     printf("> Good bye!\n");
     exit(EXIT_SUCCESS);
-    }
 }
 
 /*
@@ -143,18 +166,12 @@ void sig_handle(int signum){
     Auf was für ein Konto welche Geldsumme abgebucht oder hinzugebucht wird, 
     soll mit Zufallszahlen gesteuert werden.
 
-
 */
-
-void for_child(int i){
-
-}
 int main(){
-    parent = getpid();
 
     // shared data created here
     // error handled in source
-    int server = createSharedForWrite();
+    server = createSharedForWrite();
 
     // truncating shared memory segment
     configureMem(server, sizeof(sh_attr));
@@ -174,19 +191,18 @@ int main(){
     
     // init mutex and handling error
     if(pthread_mutex_init(shared_data->mutex, NULL)!= 0){
-        perror("Mitex initialisation");
+        free(shared_data->mutex);
+        perror("Mutex initialisation");
     }
+    printf("Program start...\n");
 
     for(int i = 0; i < 5; i++){
+        // fork a process
         pids[i] = fork();
 
-        /*int shm = createSharedForRead();
-        void* adr = mapSegment(shm,sizeof(shared_data));*/
-        // because we set the size of segment to our struct size when configuring
-        //sh_attr *msg = (sh_attr*) adr;
-
-        if(pids[i] < 0){
+        if(pids[i] < 0){ // no process created?
             perror("Error creating a process");
+            free(shared_data->mutex);
             exit(EXIT_FAILURE);
         }else if(pids[i] == 0){
             
@@ -194,17 +210,17 @@ int main(){
                 srand(time(NULL)^shared_data->acounts[i]->amount);
                 int amount = (rand() % 100) - 50;
                 int index= rand() % 12;
-                clientAccessAccount(shared_data->acounts[index],amount);
+                clientAccessAccount(index,amount);
                 usleep(rand()%10000);
             }
         }
     }
+    // signal handler @see sharedmemory.c / sharedmemory.h
     registerShutdownHandler(&sig_handle);
-    // signal handler
     while(1){
+        // alarm every 3 seconds
         alarm(3);
         pause();
-        //serverReadAccounts(shared_data->acounts);
     }
     
     for(int i = 0; i < 5; i++){
@@ -215,12 +231,10 @@ int main(){
     //free(shared_data->acounts);
     free(shared_data->mutex);
     pthread_mutex_destroy(shared_data->mutex);
-    unmapShared(shared_data, sizeof(shared_data));
+    // unmap shared memory
+    // @see sharedmemory.c / sharedmemory.h
+    unmapShared(shared_data, sizeof(sh_attr));
+    // unlink shared memory
+    // @see sharedmemory.c / sharedmemory.h
     unlinkShared();
 }
-
-/*
-    Sorgen Sie bei allen Systemaufrufen für eine entsprechende 
-    Fehlerbehandlung und geben Sie im Bedarfsfall eine Fehlermeldung auf stderr aus.
-
-*/

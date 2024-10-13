@@ -27,7 +27,7 @@
 //# define SH_SIZE sizeof(shared_data_t)
 # define MSG_SIZE 1024
 
-
+// this can be modified to hold whatever data we want
 typedef struct
 {
     // the actual message
