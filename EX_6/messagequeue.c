@@ -13,9 +13,10 @@
  * send message through messageQueue
  * close and unlink messageQueue
  */
-
+#define _XOPEN_SOURCE 700
 # include "messagequeue.h"
 # include <mqueue.h>
+# include <signal.h>
 
 // creates messagequeue fro receiver
 int createForReceiver(char *name)
@@ -86,4 +87,28 @@ void unlinkQueue(char *name)
         perror("Error unlinking mq");
         exit(EXIT_FAILURE);
     }
+}
+
+void registerShutdownHandler(void* fnc) {
+    struct sigaction my_signal;
+
+	my_signal.sa_handler = fnc;
+	sigemptyset (&my_signal.sa_mask);
+	sigaddset(&my_signal.sa_mask, SIGTERM);
+	sigaddset(&my_signal.sa_mask, SIGINT);
+	sigaddset(&my_signal.sa_mask, SIGQUIT);
+	my_signal.sa_flags = 0;
+
+	if (sigaction(SIGTERM, &my_signal, NULL) != 0) {
+		perror("Fehler beim Registrieren des Signal-Handlers");
+		exit(1);
+	}
+	if (sigaction(SIGINT, &my_signal, NULL) != 0) {
+		perror("Fehler beim Registrieren des Signal-Handlers");
+		exit(1);
+	}
+	if (sigaction(SIGQUIT, &my_signal, NULL) != 0) {
+		perror("Fehler beim Registrieren des Signal-Handlers");
+		exit(1);
+	}
 }

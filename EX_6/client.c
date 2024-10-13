@@ -17,11 +17,14 @@
 # include <stdlib.h>
 # include <string.h>
 # include "messagequeue.h"
+# include <time.h>
 
 char  MESSAGE[8][30]= {"Hello this is a message to\n"," printer service prints this\n", 
                     "This is another print message\n", "please print this paragraph\n", 
                     "Hey printer.Thanks for print\n","Ok this is getting serious.\n", 
                     "this is too much"," this is final text\n"};
+
+
 
 int main(int argv, char** argc){
     
@@ -37,14 +40,15 @@ int main(int argv, char** argc){
 
     // creating message que for sending
     mqd_t mqd = createForSender(MQ_NAME);
+
     // set attribute of mesage que
     // random index for message
+    srand(time(NULL));
     int i = rand() % 8;
-    int size = sizeof(MESSAGE);
 
     // copy messages to attribute
     strncpy(msg->message,MESSAGE[i],sizeof(MESSAGE[i]));
-    int pr = atoi(argc[2]); 
+    unsigned pr = atoi(argc[2]); 
 
     // sending message
     sendMessage(&mqd, (char*)msg,sizeof(queue),pr);
@@ -52,26 +56,24 @@ int main(int argv, char** argc){
     struct mq_attr attr;
     // feed back queue
     mqd_t caller = createForReceiver(MQ_CALL);
-    printf("Done sending message with priority %d to service\n", pr);
+    printf("Sent message[%d] with priority %d to service. \nWaiting for response...\n",i ,pr);
     // get attribute of feedback queue
     getQueueAttribute(caller, &attr);
+
     // buffer initialised because valgrind complained
-    char callback_message[4] = {};
-    while(1){ // block to receive message
-        receiveMessage(caller,callback_message,attr,&pr);
-        // is we find some message
-        if(attr.mq_msgsize != 0){
-            printf("received feed back from service\n");
-            break;
-        }
-    }
+    char callback_message[attr.mq_msgsize];
+
+    // lets wait for response and print it
+    receiveMessage(caller,callback_message,attr,&pr);
+    printf("Server response: %s\n", callback_message);
     
     free(msg);
-    // close
-    // close
+    // close 
     closeQueue(mqd);
-    // these are tricky
+    // these are a problem. if I close them here, 
+    // I can seem to get them when new instance of this proccess is run again
     //closeQueue(caller);
     //unlinkQueue(MQ_CALL);
     return EXIT_SUCCESS;
 }
+

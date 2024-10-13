@@ -49,6 +49,8 @@ void receiveMessage(mqd_t mqd, char*msg, struct mq_attr attr, unsigned *priority
 // get attr.
 void getQueueAttribute( mqd_t mqd, struct mq_attr *attr);
 
+void registerShutdownHandler(void* fnc);
+
 #endif //MESSAGEQUEUE_H
 
 
