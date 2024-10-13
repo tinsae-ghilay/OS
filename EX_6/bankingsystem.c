@@ -152,11 +152,13 @@ void sig_handle(int signum){
             kill(pids[i],signum);
         }
     }
-    //unmapShared(&server,sizeof(sh_attr));
+    //unlink shared memory so it doesnt persist after all processes are terminated
     unlinkShared();
+    close(server);
     
     // the we exit parent process normally
     printf("> Good bye!\n");
+    wait(NULL);
     exit(EXIT_SUCCESS);
 }
 
@@ -230,6 +232,9 @@ int main(){
 
     //free(shared_data->acounts);
     free(shared_data->mutex);
+    // may be?
+    free(shared_data);
+    // destroy mutex
     pthread_mutex_destroy(shared_data->mutex);
     // unmap shared memory
     // @see sharedmemory.c / sharedmemory.h
@@ -237,4 +242,6 @@ int main(){
     // unlink shared memory
     // @see sharedmemory.c / sharedmemory.h
     unlinkShared();
+    // close file descriptor
+    close(server);
 }
