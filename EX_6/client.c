@@ -47,7 +47,7 @@ int main(int argv, char** argc){
     int i = rand() % 8;
 
     // copy messages to attribute
-    strncpy(msg->message,MESSAGE[i],sizeof(MESSAGE[i]));
+    strncpy(msg->message,MESSAGE[i],sizeof(MESSAGE[i]+1));
     unsigned pr = atoi(argc[2]); 
 
     // sending message

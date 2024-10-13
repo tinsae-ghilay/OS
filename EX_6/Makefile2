@@ -1,13 +1,13 @@
 # source files
 # no need to explain a wildcard in name and sign
-files = printserver.c messagequeue.c
+files = bankingsystem.c sharedmemory.c
 # object files instead of listing them.
 # this way we have our make file always working,
 # so long as files are in the same folder
 # then substitute the .cpp part of $(files) with .o
-objects = printserver.o messagequeue.o
+objects = bankingsystem.o sharedmemory.o
 # executable file
-BIN = printserver
+BIN = bankingsystem
 #g++ commands
 # g++
 CFLAG = gcc
@@ -21,7 +21,7 @@ all: $(BIN)
 
 # create executable from object files
 $(BIN): $(objects)
-	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects)
+	$(CFLAG) $(WFLAG) -g -o $(BIN) $(objects) -lrt
 
 # create object files from source files
 %.o: %.c
