@@ -70,6 +70,7 @@ int main(int argv, char** argc){
     free(msg);
     // close 
     closeQueue(mqd);
+    
     // these are a problem. if I close them here, 
     // I can seem to get them when new instance of this proccess is run again
     //closeQueue(caller);
