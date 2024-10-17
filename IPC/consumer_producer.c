@@ -42,28 +42,34 @@ pthread_cond_t producer_c, consumer_c;
 
 // signal handler
 void registerShutdownHandler(void* fnc) {
-    struct sigaction my_signal;
 
+    // creating a sigaction struct
+    struct sigaction my_signal;
+    // if a signal is active, diactivate all other signals
 	my_signal.sa_handler = fnc;
 	sigemptyset (&my_signal.sa_mask);
 	sigaddset(&my_signal.sa_mask, SIGTERM);
 	sigaddset(&my_signal.sa_mask, SIGINT);
 	sigaddset(&my_signal.sa_mask, SIGQUIT);
 	sigaddset(&my_signal.sa_mask, SIGALRM);
-	my_signal.sa_flags = 0;
 
-	if (sigaction(SIGTERM, &my_signal, NULL) != 0) {
+    // if a system call is interrupted by a signal
+    // it should end up where it left off
+	my_signal.sa_flags = SA_RESTART;
+
+    // register signal handler for SIGTERM, SIGINT, SIGQUIT
+	/*if (sigaction(SIGTERM, &my_signal, NULL) != 0) {
 		perror("Fehler beim Registrieren des Signal-Handlers");
 		exit(1);
-	}
+	}*/
 	if (sigaction(SIGINT, &my_signal, NULL) != 0) {
 		perror("Fehler beim Registrieren des Signal-Handlers");
 		exit(1);
 	}
-	if (sigaction(SIGQUIT, &my_signal, NULL) != 0) {
+	/*if (sigaction(SIGQUIT, &my_signal, NULL) != 0) {
 		perror("Fehler beim Registrieren des Signal-Handlers");
 		exit(1);
-	}
+	}*/
 	// Register SIGALRM handler
     if (sigaction(SIGALRM, &my_signal, NULL) != 0) {
         perror("Fehler beim Registrieren des Signal-Handlers");
@@ -89,7 +95,12 @@ void sig_handle(int signum){
         (itterations == REPEATS)? task_end_flag = 1: itterations ++;
         return;
     }
-    // SIGTERM or other signal received?
+    
+    // SIGINT or other signal received?
+    if(signum != SIGINT){
+        // I am not interested in other signals
+        return;
+    }
     char buff[64];
 
     pthread_mutex_lock(&mutex); // we hold lock and stop other threads from doing anything.
