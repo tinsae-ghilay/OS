@@ -13,7 +13,10 @@
  *
  *
  */
-#define _XOPEN_SOURCE   600
+
+// helps with POSIX compatibility
+// broader than _POSIX_C_SOURCE
+# define _XOPEN_SOURCE   600
 # include <stdio.h>
 # include <stdlib.h>
 # include <pthread.h>
@@ -21,26 +24,43 @@
 # include <signal.h>
 # include <string.h>
 # include <time.h>
-
+#include <sys/time.h>
+// capacity of container in structure
 # define CAPACITY 10
+// number of workers(producers)
 # define WORKERS 6
+// how much time (* ALARM seconds our program runs)
 # define REPEATS 10
+// alarm interval in seconds
+#define ALARM_INTERVAL 3
 
 
-
+// structure to hold our data
 typedef struct{
     int is_full;
     int container[CAPACITY];
     int current_index;
 }thread_data_t;
 
+// declaring data structure
 thread_data_t data = {0,{0},0};
-int task_end_flag = 0, itterations = 0;
+
+// flag to tell our program to end
+int task_end_flag = 0;
+// program pause
+int pause_flag = 0;
+
+// itteration count -> may be we dont want it
+int itterations = 0;
+
+// Mutex
 pthread_mutex_t mutex;
+
+// consumer and producer conditions
 pthread_cond_t producer_c, consumer_c; 
 
-
 // signal handler
+// registers signals 
 void registerShutdownHandler(void* fnc) {
 
     // creating a sigaction struct
@@ -55,25 +75,50 @@ void registerShutdownHandler(void* fnc) {
     // if a system call is interrupted by a signal
     // it should end up where it left off
 	my_signal.sa_flags = SA_RESTART;
+
     // register signal handler for SIGINT as that is what we need. 
 	if (sigaction(SIGINT, &my_signal, NULL) != 0) {
 		perror("Fehler beim Registrieren des Signal-Handlers");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Register SIGALRM handler as well
     if (sigaction(SIGALRM, &my_signal, NULL) != 0) {
         perror("Fehler beim Registrieren des Signal-Handlers");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
-// clean up to destroy mutex and conditions
+// returns true // if we get les than 9 randomly
+// bad aproximation of 10 % 
+int qualityCheck(){
+    // trying to generate a better random than time seeded
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    srand(t.tv_usec / 1297);
+    int res = rand() % 100;
+    return (res > 9)? 1 : 0;
+}
+
+// clean up mutex and conditions
 void clean_up()
 {
     pthread_mutex_destroy(&mutex);
     pthread_cond_destroy(&consumer_c);
     pthread_cond_destroy(&producer_c);
+}
+
+// this is to un pause program from pseudo pause induced by a signal
+// since program is running in a continous loop, we need to to hold mutex lock to stop this loop
+// after that we call this to release lock and broadcast to all threads
+void unpause()
+{
+    // reset pause flag
+    pause_flag = 0;
+    // release mutex and broadcast conditions for all
+    pthread_mutex_unlock(&mutex);
+    pthread_cond_broadcast(&consumer_c);
+    pthread_cond_broadcast(&producer_c);
 }
 
 // sig action handler
@@ -93,33 +138,31 @@ void sig_handle(int signum){
         return;
     }
     char buff[64];
-
-    pthread_mutex_lock(&mutex); // we hold lock and stop other threads from doing anything.
+    // try to tell threads to pause(sleep) and wait for signal
+    // this is done in producer and consumer thread functions
+    pause_flag = 1;
+    // we hold lock and stop other threads from doing anything.
+    pthread_mutex_lock(&mutex);
     // we prompt user is indeed wants to exit
-    printf("\nYou really want to quite? [y/n] ");
+    printf("\nYou really want to quit? [y/n]");
     while(fgets(buff, 64,stdin) != NULL){
         // does user reall want to exit?
         if(strncmp(buff, "y", 1) == 0){
             // set task end to true
             task_end_flag = 1;
-            // and brodcast or signal to all threads that may be waiting
-            pthread_cond_signal(&consumer_c);
-            pthread_cond_broadcast(&producer_c);
-            pthread_mutex_unlock(&mutex);
-            // and clean up
-            clean_up();
-            // the we exit parent process normally
-            printf("> Good bye!\n");
-            exit(EXIT_SUCCESS);
+            // unpause program and let it end // clean up after itself
+            unpause();
+            // we have set up program to exit normaly
+            // so we return
+            return;
         }
         // if user pressed n the we break the loop and get back to whatever we were doing
         if(strncmp(buff, "n", 1) == 0){
-            // and brodcast or signal to all threads that may be waiting
-            pthread_cond_signal(&consumer_c);
-            pthread_cond_broadcast(&producer_c);
-            pthread_mutex_unlock(&mutex);
+            // unpause program and let it end // clean up after itself
+            unpause();
             return;
         }else{
+            // we ask user to provide the correct response again
             printf("please choose y to end program or n to continue : ");
             continue;
         }
@@ -130,32 +173,37 @@ void sig_handle(int signum){
 void *produce(void *arg)
 {
     int id = *(int*)arg;
-
+    // we free arg as we dont need it
+    free(arg);
     // while not end we will keep repeating this task
-    while(!task_end_flag){
-
+    while(1){
         // lets try lock
         pthread_mutex_lock(&mutex);
 
         // after having lock, check if we can produce
-        if(data.is_full){ // nothing to produce
-
-            // producer should wait
-            printf("producer %d sleeps\n",id);
+        // nothing to produce or pause flag is activated  thread sleeps
+        if(data.is_full || pause_flag ){ 
+            // sleep until condition signal received
             pthread_cond_wait(&producer_c,&mutex);
-            // when we are notified by producer_c, producer wakes up
-            printf("producer %d received signal and woke up\n",id);
         }
+        if(task_end_flag){
+                break;
+        }
+        
         // if data is not full, we produce one
         data.container[data.current_index] = 1;
 
-        // update current index (slot)
-        data.current_index++;
         // to simulate worker doing some thing 
         // we sleep a random amount of time
         srand(time(NULL));
         usleep(rand() % 30000);
-        printf("Producer %d added a product\n",id);
+        if(!qualityCheck()){
+            printf("product of %d didn't pass quality check\n",id);
+        }else{
+            // update current index (slot)
+            data.current_index++;
+            printf("Producer %d added a product\n",id);
+        }
 
         // data might be full when we add.
         if(data.current_index == CAPACITY){
@@ -177,9 +225,8 @@ void *produce(void *arg)
     // if task_end_flag is set we finish
     // since consumer might be waiting on this thread signaling it
     // we broadcast (or signal since we only have one consumer in this case)
-    pthread_cond_signal(&consumer_c);
+    pthread_cond_broadcast(&consumer_c);
     pthread_mutex_unlock(&mutex);
-    free(arg);
     // there is nothing to return from this function
     return NULL;
 }
@@ -187,29 +234,36 @@ void *produce(void *arg)
 void *consume(void *arg)
 {
     // while not end we will keep repeating this task
-    while(!task_end_flag){
+    while(1){
 
         // lets try lock
         pthread_mutex_lock(&mutex);
         // after having lock, check if we can produce
-        while(!data.is_full){ // nothing to produce
-            // producer should wait
-            printf("Consumer sleeping\n");
+        // if data is empty or pause flag is activated  thread sleeps
+        if(!data.is_full || pause_flag){
             pthread_cond_wait(&consumer_c,&mutex);
-            // when we are notified by producer_c, producer wakes up
-            printf("Consumer received signal and woke up\n");
+        }
+        // if task ended, we exit loop
+        if(task_end_flag){
+                break;
         }
         // we clear the whole shelf
         printf("Consumer consuming .");
-        for(int i = 0; i < CAPACITY; i++){
+        int i = 0;
+        while(i < CAPACITY){
+            if(pause_flag){ // pause-> exit loop
+                break;
+            }
             // just to make things interesting, we will show ...... while consuming, so we flush stdout
             fflush(stdout);
             // lets also assume consumption takes time
             usleep(100000);
             printf(" .");
             data.container[i] = 0;
+            i++;
         }
-        printf("done!\n");
+        // if exited loop because of pause , or because done
+        (pause_flag)?printf("paused\n") : printf("done!\n");
         // we have cleared data. so we set index to 0
         data.current_index = 0;
         // and set data as empty
@@ -221,6 +275,9 @@ void *consume(void *arg)
         // we may do other activities before we get back again, 
         // so imitate this by sleeping for random aount of time
         srand(time(NULL));
+        if(task_end_flag){
+            break;
+        }
         usleep((rand() % 30000)); // then we repeat
     }
     // if task_end_flag is set we finish
@@ -295,9 +352,20 @@ int main()
             exit(EXIT_FAILURE); 
         }
     }
-
+    if(data.current_index > 0){
+        printf("cleaning shop");
+    }
+    while(data.current_index > 0){
+        // clear array
+        data.container[data.current_index] = 0;
+        fflush(stdout);
+        printf(" .");
+        data.current_index--;
+    }
+    printf(" shop is empty\n");
     // clean up when we are done
     clean_up();
+    printf("> Good bye!\n");
     return EXIT_SUCCESS;
 
 }
