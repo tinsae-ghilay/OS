@@ -48,29 +48,20 @@ void registerShutdownHandler(void* fnc) {
     // if a signal is active, diactivate all other signals
 	my_signal.sa_handler = fnc;
 	sigemptyset (&my_signal.sa_mask);
-	sigaddset(&my_signal.sa_mask, SIGTERM);
+    // let the system handle other signals except SIGTERM and SIGINT
 	sigaddset(&my_signal.sa_mask, SIGINT);
-	sigaddset(&my_signal.sa_mask, SIGQUIT);
 	sigaddset(&my_signal.sa_mask, SIGALRM);
 
     // if a system call is interrupted by a signal
     // it should end up where it left off
 	my_signal.sa_flags = SA_RESTART;
-
-    // register signal handler for SIGTERM, SIGINT, SIGQUIT
-	/*if (sigaction(SIGTERM, &my_signal, NULL) != 0) {
-		perror("Fehler beim Registrieren des Signal-Handlers");
-		exit(1);
-	}*/
+    // register signal handler for SIGINT as that is what we need. 
 	if (sigaction(SIGINT, &my_signal, NULL) != 0) {
 		perror("Fehler beim Registrieren des Signal-Handlers");
 		exit(1);
 	}
-	/*if (sigaction(SIGQUIT, &my_signal, NULL) != 0) {
-		perror("Fehler beim Registrieren des Signal-Handlers");
-		exit(1);
-	}*/
-	// Register SIGALRM handler
+
+	// Register SIGALRM handler as well
     if (sigaction(SIGALRM, &my_signal, NULL) != 0) {
         perror("Fehler beim Registrieren des Signal-Handlers");
         exit(1);
@@ -241,7 +232,7 @@ void *consume(void *arg)
     return NULL;
 }
 
-// driver
+// main function
 int main()
 {
     // alarm trigger
