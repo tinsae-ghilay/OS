@@ -4,16 +4,16 @@
  * Created on Thu Oct 17 2024
  *
  * created by Kahsay Tinsae Ghilay
- * Matrikelnummer: ********
+ * Matrikelnummer: 01640282
  *
  * Course tittle Operating Systems
  *
  *
- *
+ * implements a simulation of throwing and collecting of coins
+ * and at the end outputs how many coins were collected by each hunter.
  *
  *
  */
-
 // helps with POSIX compatibility
 // broader than _POSIX_C_SOURCE
 # define _XOPEN_SOURCE   600
@@ -280,6 +280,19 @@ void *shake(void *arg)
 // main function
 int main()
 {
+    // as requisted, we also initite the bag holding some random amount of coins
+    srand(time(NULL));
+    // maximum it can hold is CAPACITY -1. therefore
+    int random = rand()%CAPACITY;
+    if(random +1 == CAPACITY){
+        data.is_full = 1;
+    }
+    printf("bag has %d coins at the begining (randomly generated)\n",random);
+    data.current_index = random;
+    // and fill bag with coins
+    for(int i = 0; i < CAPACITY; i++){
+        data.container[i] = 1;
+    }
     // alarm trigger
     // simplified version from previous excercise
     registerShutdownHandler(&sig_handle);
