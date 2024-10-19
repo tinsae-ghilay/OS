@@ -27,7 +27,7 @@
 #include <sys/time.h>
 // capacity of container in structure
 # define CAPACITY 10
-// number of workers(producers)
+// number of workers(hunters)
 # define WORKERS 6
 // how much time (* ALARM seconds our program runs)
 # define REPEATS 10
@@ -56,8 +56,8 @@ int itterations = 0;
 // Mutex
 pthread_mutex_t mutex;
 
-// consumer and producer conditions
-pthread_cond_t producer_c, consumer_c; 
+// merchant and hunter conditions
+pthread_cond_t hunter_c, merchant_c; 
 
 // signal handler
 // registers signals 
@@ -89,23 +89,12 @@ void registerShutdownHandler(void* fnc) {
     }
 }
 
-// returns true // if we get les than 9 randomly
-// bad aproximation of 10 % 
-int qualityCheck(){
-    // trying to generate a better random than time seeded
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    srand(t.tv_usec / 1297);
-    int res = rand() % 100;
-    return (res > 9)? 1 : 0;
-}
-
 // clean up mutex and conditions
 void clean_up()
 {
     pthread_mutex_destroy(&mutex);
-    pthread_cond_destroy(&consumer_c);
-    pthread_cond_destroy(&producer_c);
+    pthread_cond_destroy(&merchant_c);
+    pthread_cond_destroy(&hunter_c);
 }
 
 // this is to un pause program from pseudo pause induced by a signal
@@ -117,8 +106,8 @@ void unpause()
     pause_flag = 0;
     // release mutex and broadcast conditions for all
     pthread_mutex_unlock(&mutex);
-    pthread_cond_broadcast(&consumer_c);
-    pthread_cond_broadcast(&producer_c);
+    pthread_cond_broadcast(&merchant_c);
+    pthread_cond_broadcast(&hunter_c);
 }
 
 // sig action handler
@@ -139,7 +128,7 @@ void sig_handle(int signum){
     }
     char buff[64];
     // try to tell threads to pause(sleep) and wait for signal
-    // this is done in producer and consumer thread functions
+    // this is done in hunter and merchant thread functions
     pause_flag = 1;
     // we hold lock and stop other threads from doing anything.
     pthread_mutex_lock(&mutex);
@@ -169,8 +158,8 @@ void sig_handle(int signum){
     }
 }
 
-// producer function
-void *produce(void *arg)
+// hunter function
+void *pick(void *arg)
 {
     int id = *(int*)arg;
     // we free arg as we dont need it
@@ -180,30 +169,25 @@ void *produce(void *arg)
         // lets try lock
         pthread_mutex_lock(&mutex);
 
-        // after having lock, check if we can produce
-        // nothing to produce or pause flag is activated  thread sleeps
+        // after having lock, check if we can pick
+        // nothing to pick or pause flag is activated  thread sleeps
         if(data.is_full || pause_flag ){ 
             // sleep until condition signal received
-            pthread_cond_wait(&producer_c,&mutex);
+            pthread_cond_wait(&hunter_c,&mutex);
         }
         if(task_end_flag){
                 break;
         }
         
-        // if data is not full, we produce one
+        // if data is not full, we pick one
         data.container[data.current_index] = 1;
 
         // to simulate worker doing some thing 
         // we sleep a random amount of time
         srand(time(NULL));
         usleep(rand() % 30000);
-        if(!qualityCheck()){
-            printf("product of %d didn't pass quality check\n",id);
-        }else{
-            // update current index (slot)
-            data.current_index++;
-            printf("Producer %d added a product\n",id);
-        }
+        data.current_index++;
+        printf("hunter %d picked a coin\n",id);
 
         // data might be full when we add.
         if(data.current_index == CAPACITY){
@@ -211,9 +195,9 @@ void *produce(void *arg)
         }
 
         // we have done our work 
-        // so we have to signal either to other producers or consumer
+        // so we have to signal either to other hunters or merchant
         // depending on how full our container is
-        (data.is_full)? pthread_cond_signal(&consumer_c): pthread_cond_signal(&producer_c);
+        (data.is_full)? pthread_cond_signal(&merchant_c): pthread_cond_signal(&hunter_c);
         // we free lock
         pthread_mutex_unlock(&mutex);
         // and we are simulating workder doing some thing elese
@@ -223,32 +207,33 @@ void *produce(void *arg)
     }
 
     // if task_end_flag is set we finish
-    // since consumer might be waiting on this thread signaling it
-    // we broadcast (or signal since we only have one consumer in this case)
-    pthread_cond_broadcast(&consumer_c);
+    // since merchant might be waiting on this thread signaling it
+    // we broadcast (or signal since we only have one merchant in this case)
+    pthread_cond_broadcast(&merchant_c);
     pthread_mutex_unlock(&mutex);
     // there is nothing to return from this function
     return NULL;
 }
 
-void *consume(void *arg)
+void *shake(void *arg)
 {
     // while not end we will keep repeating this task
     while(1){
 
         // lets try lock
         pthread_mutex_lock(&mutex);
-        // after having lock, check if we can produce
+        // after having lock, check if we can pick
         // if data is empty or pause flag is activated  thread sleeps
         if(!data.is_full || pause_flag){
-            pthread_cond_wait(&consumer_c,&mutex);
+            pthread_cond_wait(&merchant_c,&mutex);
+            printf("Merchant is filling %d pebels int to hi bag\n", CAPACITY);
         }
         // if task ended, we exit loop
         if(task_end_flag){
                 break;
         }
         // we clear the whole shelf
-        printf("Consumer consuming .");
+        printf("merchant consuming .");
         int i = 0;
         while(i < CAPACITY){
             if(pause_flag){ // pause-> exit loop
@@ -268,8 +253,8 @@ void *consume(void *arg)
         data.current_index = 0;
         // and set data as empty
         data.is_full = 0;
-        // we have done our work so we have to signal producers
-        pthread_cond_signal(&producer_c);
+        // we have done our work so we have to signal hunters
+        pthread_cond_signal(&hunter_c);
         // we free lock
         pthread_mutex_unlock(&mutex);
         // we may do other activities before we get back again, 
@@ -281,9 +266,9 @@ void *consume(void *arg)
         usleep((rand() % 30000)); // then we repeat
     }
     // if task_end_flag is set we finish
-    // since producers might be waiting on this thread signaling
+    // since hunters might be waiting on this thread signaling
     // we broadcast 
-    pthread_cond_broadcast(&producer_c);
+    pthread_cond_broadcast(&hunter_c);
     pthread_mutex_unlock(&mutex);
     // there is nothing to return from this function
     return NULL;
@@ -302,16 +287,16 @@ int main()
         exit(EXIT_FAILURE);
     }
     // init conditions
-    if(pthread_cond_init(&consumer_c, NULL) != 0 ||
-    pthread_cond_init(&producer_c, NULL) != 0){
+    if(pthread_cond_init(&merchant_c, NULL) != 0 ||
+    pthread_cond_init(&hunter_c, NULL) != 0){
         perror("Error init conditions");
         pthread_mutex_destroy(&mutex);
         exit(EXIT_FAILURE);
     }
 
-    // lets now declare thread ids for consumer and producer
-    pthread_t consumer;
-    pthread_t producers[WORKERS];
+    // lets now declare thread ids for merchant and hunter
+    pthread_t merchant;
+    pthread_t hunters[WORKERS];
     // now lets create threads
 
     for(int i = 0; i < WORKERS; i++){
@@ -319,7 +304,7 @@ int main()
         int *id = malloc(sizeof(int));
         *id = i;
         // creating threads
-        if(pthread_create(&producers[i], NULL, &produce, id) != 0){ // error creating threads
+        if(pthread_create(&hunters[i], NULL, &pick, id) != 0){ // error creating threads
             // if thread creation didnt succeed, we have to clean up
             free(id);
             clean_up();
@@ -327,10 +312,10 @@ int main()
             exit(EXIT_FAILURE); 
         }
     }
-    // consumer thread.
-    if(pthread_create(&consumer,NULL,&consume, NULL) != 0){
+    // merchant thread.
+    if(pthread_create(&merchant,NULL,&shake, NULL) != 0){
         clean_up();
-        perror("Error consumer thread");
+        perror("Error merchant thread");
         exit(EXIT_FAILURE);
     }
     while(!task_end_flag){
@@ -339,14 +324,14 @@ int main()
         pause();
     }
     // we wait for threads to join
-    if(pthread_join(consumer,NULL)!= 0){ // error in joining
-        perror("Error Joining consumer thread");
+    if(pthread_join(merchant,NULL)!= 0){ // error in joining
+        perror("Error Joining merchant thread");
         clean_up();
         exit(EXIT_FAILURE); 
     }
     // wait for worker threads to join
     for(int i = 0; i < WORKERS; i++){
-        if(pthread_join(producers[i], NULL) != 0){ // error in joining
+        if(pthread_join(hunters[i], NULL) != 0){ // error in joining
             clean_up();
             perror("Error joining threads");
             exit(EXIT_FAILURE); 
