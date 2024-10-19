@@ -162,6 +162,7 @@ void sig_handle(int signum){
 void *pick(void *arg)
 {
     int id = *(int*)arg;
+    int total_coins = 0;
     // we free arg as we dont need it
     free(arg);
     // while not end we will keep repeating this task
@@ -188,6 +189,7 @@ void *pick(void *arg)
         usleep(rand() % 30000);
         data.current_index++;
         printf("hunter %d picked a coin\n",id);
+        total_coins++;
 
         // data might be full when we add.
         if(data.current_index == CAPACITY){
@@ -212,6 +214,7 @@ void *pick(void *arg)
     pthread_cond_broadcast(&merchant_c);
     pthread_mutex_unlock(&mutex);
     // there is nothing to return from this function
+    printf("Hunter %d collected %d coins and went his merry way\n", id, total_coins);
     return NULL;
 }
 
@@ -226,14 +229,14 @@ void *shake(void *arg)
         // if data is empty or pause flag is activated  thread sleeps
         if(!data.is_full || pause_flag){
             pthread_cond_wait(&merchant_c,&mutex);
-            printf("Merchant is filling %d pebels int to hi bag\n", CAPACITY);
+            printf("Merchant is filling %d pebels int to his bag\n", CAPACITY);
         }
         // if task ended, we exit loop
         if(task_end_flag){
                 break;
         }
         // we clear the whole shelf
-        printf("merchant consuming .");
+        printf("merchant shaking the magic bag .");
         int i = 0;
         while(i < CAPACITY){
             if(pause_flag){ // pause-> exit loop
@@ -248,7 +251,7 @@ void *shake(void *arg)
             i++;
         }
         // if exited loop because of pause , or because done
-        (pause_flag)?printf("paused\n") : printf("done!\n");
+        (pause_flag)?printf("paused\n") : printf("threw coins!\n");
         // we have cleared data. so we set index to 0
         data.current_index = 0;
         // and set data as empty
@@ -278,7 +281,7 @@ void *shake(void *arg)
 int main()
 {
     // alarm trigger
-    // signal handler @see sharedmemory.c / sharedmemory.h
+    // simplified version from previous excercise
     registerShutdownHandler(&sig_handle);
 
     // init mutex
@@ -308,7 +311,7 @@ int main()
             // if thread creation didnt succeed, we have to clean up
             free(id);
             clean_up();
-            perror("Error creating threads");
+            perror("Error creating hunter threads");
             exit(EXIT_FAILURE); 
         }
     }
@@ -337,17 +340,6 @@ int main()
             exit(EXIT_FAILURE); 
         }
     }
-    if(data.current_index > 0){
-        printf("cleaning shop");
-    }
-    while(data.current_index > 0){
-        // clear array
-        data.container[data.current_index] = 0;
-        fflush(stdout);
-        printf(" .");
-        data.current_index--;
-    }
-    printf(" shop is empty\n");
     // clean up when we are done
     clean_up();
     printf("> Good bye!\n");
