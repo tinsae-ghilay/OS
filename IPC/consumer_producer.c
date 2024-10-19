@@ -1,5 +1,5 @@
 /*
- * mine.c
+ * goldcoins.c
  *
  * Created on Thu Oct 17 2024
  *
@@ -11,7 +11,6 @@
  *
  * implements a simulation of throwing and collecting of coins
  * and at the end outputs how many coins were collected by each hunter.
- *
  *
  */
 // helps with POSIX compatibility
@@ -25,7 +24,7 @@
 # include <string.h>
 # include <time.h>
 #include <sys/time.h>
-// capacity of container in structure
+// capacity of coin in structure
 # define CAPACITY 10
 // number of workers(hunters)
 # define WORKERS 6
@@ -35,22 +34,23 @@
 #define ALARM_INTERVAL 3
 
 
-// structure to hold our data
+// structure to hold our purse
 typedef struct{
-    int is_full;
-    int container[CAPACITY];
+    int is_empty;
+    int coin[CAPACITY];
     int current_index;
-}thread_data_t;
+}purse_t;
 
-// declaring data structure
-thread_data_t data = {0,{0},0};
+// declaring purse structure
+// not neccesary because we reset it anyway in main
+purse_t purse = {1,{0},0};
 
 // flag to tell our program to end
 int task_end_flag = 0;
 // program pause
 int pause_flag = 0;
 
-// itteration count -> may be we dont want it
+// itteration count
 int itterations = 0;
 
 // Mutex
@@ -78,13 +78,13 @@ void registerShutdownHandler(void* fnc) {
 
     // register signal handler for SIGINT as that is what we need. 
 	if (sigaction(SIGINT, &my_signal, NULL) != 0) {
-		perror("Fehler beim Registrieren des Signal-Handlers");
+		perror("Failure registering signal-handler SIGINT");
 		exit(EXIT_FAILURE);
 	}
 
 	// Register SIGALRM handler as well
     if (sigaction(SIGALRM, &my_signal, NULL) != 0) {
-        perror("Fehler beim Registrieren des Signal-Handlers");
+        perror("Failure registering signal-handler SIGALARM");
         exit(EXIT_FAILURE);
     }
 }
@@ -172,7 +172,7 @@ void *pick(void *arg)
 
         // after having lock, check if we can pick
         // nothing to pick or pause flag is activated  thread sleeps
-        if(data.is_full || pause_flag ){ 
+        if(purse.is_empty || pause_flag ){ 
             // sleep until condition signal received
             pthread_cond_wait(&hunter_c,&mutex);
         }
@@ -180,26 +180,26 @@ void *pick(void *arg)
                 break;
         }
         
-        // if data is not full, we pick one
-        data.container[data.current_index] = 1;
+        // if purse has coins, we pick one
+        purse.coin[purse.current_index] = 0;
 
         // to simulate worker doing some thing 
         // we sleep a random amount of time
         srand(time(NULL));
         usleep(rand() % 30000);
-        data.current_index++;
+        purse.current_index--;
         printf("hunter %d picked a coin\n",id);
         total_coins++;
 
-        // data might be full when we add.
-        if(data.current_index == CAPACITY){
-            data.is_full = 1;
+        // purse might be empty when we picked one.
+        if(purse.current_index < 0){
+            purse.is_empty = 1;
         }
 
         // we have done our work 
         // so we have to signal either to other hunters or merchant
-        // depending on how full our container is
-        (data.is_full)? pthread_cond_signal(&merchant_c): pthread_cond_signal(&hunter_c);
+        // depending on how full our coin is
+        (purse.is_empty)? pthread_cond_signal(&merchant_c): pthread_cond_signal(&hunter_c);
         // we free lock
         pthread_mutex_unlock(&mutex);
         // and we are simulating workder doing some thing elese
@@ -225,37 +225,37 @@ void *shake(void *arg)
 
         // lets try lock
         pthread_mutex_lock(&mutex);
-        // after having lock, check if we can pick
-        // if data is empty or pause flag is activated  thread sleeps
-        if(!data.is_full || pause_flag){
+        // after having lock, check if we can fill pebels
+        // if purse is full or pause flag is activated  thread sleeps
+        if(!purse.is_empty || pause_flag){
             pthread_cond_wait(&merchant_c,&mutex);
-            printf("Merchant is filling %d pebels int to his bag\n", CAPACITY);
+            printf("Merchant is filling %d pebels int to his bag\n", CAPACITY - purse.current_index);
         }
         // if task ended, we exit loop
         if(task_end_flag){
                 break;
         }
-        // we clear the whole shelf
+        // we simulate filling the bag and shaking to save time
         printf("merchant shaking the magic bag .");
-        int i = 0;
+        int i = purse.current_index +1;
         while(i < CAPACITY){
             if(pause_flag){ // pause-> exit loop
                 break;
             }
-            // just to make things interesting, we will show ...... while consuming, so we flush stdout
+            // just to make things interesting, we will show ...... while fillin/shaking, so we flush stdout
             fflush(stdout);
-            // lets also assume consumption takes time
+            // lets also assume shaking takes time
             usleep(100000);
             printf(" .");
-            data.container[i] = 0;
+            purse.coin[i] = 1;
             i++;
         }
         // if exited loop because of pause , or because done
         (pause_flag)?printf("paused\n") : printf("threw coins!\n");
-        // we have cleared data. so we set index to 0
-        data.current_index = 0;
-        // and set data as empty
-        data.is_full = 0;
+        // we have filled purse. so we set index to CAPACITY-1
+        purse.current_index = CAPACITY-1;
+        // and set purse as empty
+        purse.is_empty = 0;
         // we have done our work so we have to signal hunters
         pthread_cond_signal(&hunter_c);
         // we free lock
@@ -285,13 +285,13 @@ int main()
     // maximum it can hold is CAPACITY -1. therefore
     int random = rand()%CAPACITY;
     if(random +1 == CAPACITY){
-        data.is_full = 1;
+        purse.is_empty = 0;
     }
     printf("bag has %d coins at the begining (randomly generated)\n",random);
-    data.current_index = random;
+    purse.current_index = random;
     // and fill bag with coins
-    for(int i = 0; i < CAPACITY; i++){
-        data.container[i] = 1;
+    for(int i = 0; i < random; i++){
+        purse.coin[i] = 1;
     }
     // alarm trigger
     // simplified version from previous excercise
