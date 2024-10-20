@@ -261,7 +261,7 @@ void *shake(void *arg)
         // we free lock
         pthread_mutex_unlock(&mutex);
         // we may do other activities before we get back again, 
-        // so imitate this by sleeping for random aount of time
+        // so imitate this by sleeping for random amount of time
         srand(time(NULL));
         if(task_end_flag){
             break;
