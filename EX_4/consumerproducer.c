@@ -24,7 +24,8 @@ CircularBuffer *b;
 
 // frees memory allocated in circular buffer
 // calls destroy on condition variables and mutex
-void cleanUp(){
+void cleanUp()
+{
     // free allocated memory and destroy mutex and conditions
     pthread_cond_destroy(&c_cond);
     pthread_cond_destroy(&p_cond);
@@ -32,13 +33,16 @@ void cleanUp(){
     free_buffer(b);
 }
 
-// consumer thread function
-// locks circulr buffer (this is a critical region)
-// if buffer is not empty reads data(random number)
-// adds all values and divides their sum by buffer size.
-// and resets temp value to 0 (clean slate start)
-// -> if buffer is empty, thread sleeps and notifies producer threads.
-void *consume(void *arg){
+/** 
+ * consumer thread function
+ * locks circulr buffer (this is a critical region)
+ * if buffer is not empty reads data(random number)
+ * adds all values and divides their sum by buffer size.
+ * and resets temp value to 0 (clean slate start)
+ * -> if buffer is empty, thread sleeps and notifies producer threads.
+**/
+void *consume(void *arg)
+{
     // variable to hold immidiate read value
     int t = 0;
     // variable to hold average temprature value
@@ -48,8 +52,7 @@ void *consume(void *arg){
 
     // we continue lock while testing is in progress
     while(!done_testing){
-
-		while(isEmpty(b)){ //while buffer is empty
+        while(isEmpty(b)){ //while buffer is empty
             // thread should give up lock until buffer is not empty
             printf("Logging Programm wurde schlafengelegt!\n");
             pthread_cond_wait(&c_cond, &mutex);
@@ -75,7 +78,8 @@ void *consume(void *arg){
     return NULL;
 }
 
-void *produce(void *arg){
+void *produce(void *arg)
+{
 
     // geting id from arg as we pass it when craeting thread
     // we could get thread id from system by including <sys/syscall.h> with id = syscall(SYS_gettid).
@@ -124,14 +128,15 @@ int main()
     // threads
     pthread_t consumer,producer1, producer2;
     // we could get exact thread Id's using pthread_self() but that doesnt help.
-    int temprature = 0, one = 1, two = 2;
+    int temprature = 0, s_one = 1, s_two = 2;
     // create threads
-    if(pthread_create(&producer1,NULL,&produce,&one) ||
-        pthread_create(&producer2,NULL,&produce,&two)||
+    if(pthread_create(&producer1,NULL,&produce,&s_one) ||
+        pthread_create(&producer2,NULL,&produce,&s_two)||
         pthread_create(&consumer,NULL,&consume,&temprature))
-{
+    {
         fprintf(stderr,"Error creating one of the threads\n");
         cleanUp();
+        return EXIT_FAILURE;
     }
 
     // wait and join
@@ -144,5 +149,5 @@ int main()
 
     // clean up buffer, conditions and mutex
     cleanUp();
-    return 0;
+    return EXIT_SUCCESS;
 }
